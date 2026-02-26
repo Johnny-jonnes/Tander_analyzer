@@ -18,6 +18,12 @@ settings = get_settings()
 db_url = settings.database_url
 logger.info(f"🔌 URL de connexion DB résolue (voir logs config pour détails)")
 
+# Ajouter sslmode=require pour Supabase si pas déjà présent
+if "supabase" in db_url and "sslmode" not in db_url:
+    separator = "&" if "?" in db_url else "?"
+    db_url = f"{db_url}{separator}sslmode=require"
+    logger.info("🔒 SSL activé pour Supabase")
+
 # Création du moteur avec pool de connexions
 engine = create_engine(
     db_url,
