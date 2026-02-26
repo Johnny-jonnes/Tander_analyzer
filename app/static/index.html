@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tender Analyzer - Inscription</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #3498db;
+            --primary-dark: #2980b9;
+            --secondary: #2ecc71;
+            --dark: #1a1a2e;
+            --light: #f4f7f6;
+            --success: #27ae60;
+            --error: #e74c3c;
+            --glass: rgba(255, 255, 255, 0.9);
+            --border-glass: rgba(255, 255, 255, 0.2);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: radial-gradient(circle at top right, #2c3e50, #000000);
+            background-attachment: fixed;
+            color: var(--dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            overflow-y: auto;
+        }
+
+        .container {
+            background: var(--glass);
+            padding: 50px;
+            border-radius: 24px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+            width: 100%;
+            max-width: 600px;
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--border-glass);
+            animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            font-weight: 800;
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #3498db, #2ecc71);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 12px;
+            letter-spacing: -1px;
+        }
+
+        p.subtitle {
+            color: #556779;
+            font-size: 1.1rem;
+            font-weight: 400;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #34495e;
+            transition: color 0.3s ease;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid #e0e6ed;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-family: inherit;
+            background: rgba(255, 255, 255, 0.8);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            outline: none;
+            color: var(--dark);
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            border-color: var(--primary);
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.15);
+            transform: translateY(-1px);
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        /* Logo Upload Styles */
+        .logo-upload-area {
+            border: 2px dashed #c0cad4;
+            border-radius: 12px;
+            padding: 25px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(52, 152, 219, 0.03);
+            position: relative;
+        }
+
+        .logo-upload-area:hover {
+            border-color: var(--primary);
+            background: rgba(52, 152, 219, 0.08);
+            transform: translateY(-1px);
+        }
+
+        .logo-upload-area.has-file {
+            border-color: var(--secondary);
+            background: rgba(46, 204, 113, 0.05);
+        }
+
+        .logo-upload-area input[type="file"] {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+            border: none;
+            padding: 0;
+        }
+
+        .logo-upload-icon {
+            font-size: 2.5rem;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .logo-upload-text {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        .logo-upload-text strong {
+            color: var(--primary);
+        }
+
+        .logo-preview {
+            max-width: 120px;
+            max-height: 80px;
+            border-radius: 8px;
+            margin-top: 10px;
+            display: none;
+            margin-left: auto;
+            margin-right: auto;
+            object-fit: contain;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo-filename {
+            display: none;
+            margin-top: 8px;
+            font-size: 0.8rem;
+            color: var(--success);
+            font-weight: 600;
+        }
+
+        button {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-top: 15px;
+            box-shadow: 0 10px 20px rgba(52, 152, 219, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 25px rgba(52, 152, 219, 0.4);
+            filter: brightness(1.1);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        button:active::after {
+            width: 300px;
+            height: 300px;
+            opacity: 0;
+        }
+
+        #message {
+            margin-top: 25px;
+            padding: 18px;
+            border-radius: 12px;
+            display: none;
+            text-align: center;
+            font-weight: 600;
+            backdrop-filter: blur(5px);
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .success {
+            background-color: rgba(39, 174, 96, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(39, 174, 96, 0.2);
+        }
+
+        .error {
+            background-color: rgba(231, 76, 60, 0.1);
+            color: var(--error);
+            border: 1px solid rgba(231, 76, 60, 0.2);
+        }
+
+        .loader {
+            display: none;
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 30px 20px;
+                border-radius: 0;
+            }
+
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+
+            body {
+                padding: 0;
+                background: #000;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <header>
+            <h1>Tender Analyzer</h1>
+            <p class="subtitle">Recevez les meilleurs appels d'offres par email.</p>
+        </header>
+
+        <form id="registerForm">
+            <div class="form-group">
+                <label for="name">Nom de l'Entreprise</label>
+                <input type="text" id="name" name="name" placeholder="Ex: Guinean Tech Solutions" required>
+            </div>
+
+            <div class="form-group">
+                <label for="logo">Logo de l'Entreprise</label>
+                <div class="logo-upload-area" id="logoDropArea">
+                    <span class="logo-upload-icon">&#128247;</span>
+                    <p class="logo-upload-text"><strong>Cliquez</strong> ou glissez votre logo ici</p>
+                    <p class="logo-upload-text" style="font-size: 0.75rem; margin-top: 4px;">PNG, JPG ou WEBP - Max 2 Mo
+                    </p>
+                    <input type="file" id="logo" name="logo" accept="image/png,image/jpeg,image/webp,image/gif">
+                    <img id="logoPreview" class="logo-preview" alt="Apercu logo">
+                    <p id="logoFilename" class="logo-filename"></p>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="sector">Secteur d'Activite</label>
+                <select id="sector" name="sector" required>
+                    <option value="">Selectionnez un secteur</option>
+                    <option value="Agriculture, Peche & Developpement Rural">Agriculture, Peche & Developpement Rural
+                    </option>
+                    <option value="Agroalimentaire & Transformation">Agroalimentaire & Transformation</option>
+                    <option value="Communication, Medias & Publicite">Communication, Medias & Publicite</option>
+                    <option value="Education & Formation">Education & Formation</option>
+                    <option value="Energie, Eau & Environnement">Energie, Eau & Environnement</option>
+                    <option value="Environnement, Forets & Changement Climatique">Environnement, Forets & Changement
+                        Climatique</option>
+                    <option value="Etudes & Consultances">Etudes & Consultances</option>
+                    <option value="Fournitures & Equipements">Fournitures & Equipements</option>
+                    <option value="Gouvernance & Administration Publique">Gouvernance & Administration Publique</option>
+                    <option value="Immobilier & Amenagement Urbain">Immobilier & Amenagement Urbain</option>
+                    <option value="Industrie & Commerce">Industrie & Commerce</option>
+                    <option value="Informatique & Telecommunications">Informatique & Telecommunications</option>
+                    <option value="Mines & Ressources Naturelles">Mines & Ressources Naturelles</option>
+                    <option value="QSE - Qualite, Securite & Environnement">QSE - Qualite, Securite & Environnement
+                    </option>
+                    <option value="Sante & Paramedical">Sante & Paramedical</option>
+                    <option value="Securite & Protection">Securite & Protection</option>
+                    <option value="Services Generaux & Prestations diverses">Services Generaux & Prestations diverses
+                    </option>
+                    <option value="Tourisme, Culture & Loisirs">Tourisme, Culture & Loisirs</option>
+                    <option value="Transport & Logistique">Transport & Logistique</option>
+                    <option value="Travaux Publics & Construction">Travaux Publics & Construction</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email de Notification</label>
+                <input type="email" id="email" name="email" placeholder="votre@email.com" required>
+            </div>
+
+            <div class="form-group">
+                <label for="zones">Zone d'intervention (Ville/Region)</label>
+                <input type="text" id="zones" name="zones" placeholder="Ex: Conakry, Kindia" required>
+            </div>
+
+            <div class="form-group">
+                <label for="specific_keywords">Mots-cles specifiques (Bonus score)</label>
+                <input type="text" id="specific_keywords" name="specific_keywords"
+                    placeholder="Ex: forage, solaire, maintenance">
+                <small style="color: #666; font-size: 0.8rem;">Separez les mots par des virgules.</small>
+            </div>
+
+            <div class="form-group">
+                <label for="exclude_keywords">Mots-cles a exclure (Malus score)</label>
+                <input type="text" id="exclude_keywords" name="exclude_keywords"
+                    placeholder="Ex: audit, formation, etude">
+            </div>
+
+            <div class="grid-2">
+                <div class="form-group">
+                    <label for="min_budget">Budget Min (USD)</label>
+                    <input type="number" id="min_budget" name="min_budget" value="0" min="0">
+                </div>
+                <div class="form-group">
+                    <label for="max_budget">Budget Max (USD)</label>
+                    <input type="number" id="max_budget" name="max_budget" value="0" min="0">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="experience_years">Annees d'Experience</label>
+                <input type="number" id="experience_years" name="experience_years" value="0" min="0">
+            </div>
+
+            <div class="form-group">
+                <label for="technical_capacity">Capacites Techniques & References</label>
+                <textarea id="technical_capacity" name="technical_capacity"
+                    placeholder="Decrivez brievement vos equipements, certifications ou projets recents..."
+                    rows="4"></textarea>
+            </div>
+
+            <button type="submit" id="submitBtn">
+                <span id="btnText">S'inscrire gratuitement</span>
+                <div id="loader" class="loader"></div>
+            </button>
+        </form>
+
+        <div id="message"></div>
+
+        <footer style="
+            margin-top: 30px;
+            padding: 20px 0 0 0;
+            text-align: center;
+            border-top: 1px solid #e0e6ed;
+            color: #888;
+            font-size: 13px;
+        ">
+            <p style="margin: 0;">&copy; 2026 Tender Analyzer Guinee - Propulse par Luxe</p>
+            <p style="margin-top: 6px;">Expert en Appels d'Offres ? <a href="https://wa.me/224627171397"
+                    style="color: #3498db; text-decoration: none; font-weight: bold;">Contactez le support</a></p>
+        </footer>
+    </div>
+
+    <script>
+        const form = document.getElementById('registerForm');
+        const msgDiv = document.getElementById('message');
+        const btnText = document.getElementById('btnText');
+        const loader = document.getElementById('loader');
+        const submitBtn = document.getElementById('submitBtn');
+        const logoInput = document.getElementById('logo');
+        const logoPreview = document.getElementById('logoPreview');
+        const logoFilename = document.getElementById('logoFilename');
+        const logoDropArea = document.getElementById('logoDropArea');
+
+        // Logo preview
+        logoInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                // Validate size
+                if (file.size > 2 * 1024 * 1024) {
+                    alert('Le logo ne doit pas depasser 2 Mo.');
+                    logoInput.value = '';
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    logoPreview.src = ev.target.result;
+                    logoPreview.style.display = 'block';
+                    logoFilename.textContent = file.name;
+                    logoFilename.style.display = 'block';
+                    logoDropArea.classList.add('has-file');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Drag & drop
+        logoDropArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            logoDropArea.style.borderColor = '#3498db';
+            logoDropArea.style.background = 'rgba(52, 152, 219, 0.1)';
+        });
+
+        logoDropArea.addEventListener('dragleave', () => {
+            logoDropArea.style.borderColor = '#c0cad4';
+            logoDropArea.style.background = 'rgba(52, 152, 219, 0.03)';
+        });
+
+        logoDropArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            const file = e.dataTransfer.files[0];
+            if (file && file.type.startsWith('image/')) {
+                logoInput.files = e.dataTransfer.files;
+                logoInput.dispatchEvent(new Event('change'));
+            }
+        });
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // UI State
+            submitBtn.disabled = true;
+            btnText.style.display = 'none';
+            loader.style.display = 'block';
+            msgDiv.style.display = 'none';
+
+            const formData = {
+                name: document.getElementById('name').value,
+                sector: document.getElementById('sector').value,
+                email: document.getElementById('email').value,
+                zones: document.getElementById('zones').value,
+                specific_keywords: document.getElementById('specific_keywords').value,
+                exclude_keywords: document.getElementById('exclude_keywords').value,
+                min_budget: parseFloat(document.getElementById('min_budget').value) || 0,
+                max_budget: parseFloat(document.getElementById('max_budget').value) || 0,
+                experience_years: parseInt(document.getElementById('experience_years').value) || 0,
+                technical_capacity: document.getElementById('technical_capacity').value
+            };
+
+            try {
+                // Etape 1 : Creer l'entreprise
+                const response = await fetch('/api/v1/enterprises', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData),
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    const enterpriseId = data.id;
+
+                    // Etape 2 : Uploader le logo si present
+                    const logoFile = logoInput.files[0];
+                    if (logoFile && enterpriseId) {
+                        try {
+                            const logoFormData = new FormData();
+                            logoFormData.append('file', logoFile);
+
+                            const logoResponse = await fetch(`/api/v1/enterprises/${enterpriseId}/logo`, {
+                                method: 'POST',
+                                body: logoFormData,
+                            });
+
+                            if (logoResponse.ok) {
+                                console.log('Logo uploade avec succes');
+                            } else {
+                                console.warn('Erreur upload logo');
+                            }
+                        } catch (logoErr) {
+                            console.warn('Erreur upload logo:', logoErr);
+                        }
+                    }
+
+                    msgDiv.innerHTML = "Inscription reussie !<br>Vous recevrez vos premiers appels d'offres demain matin.";
+                    msgDiv.className = 'success';
+                    msgDiv.style.display = 'block';
+                    form.reset();
+                    logoPreview.style.display = 'none';
+                    logoFilename.style.display = 'none';
+                    logoDropArea.classList.remove('has-file');
+                } else {
+                    msgDiv.textContent = "Erreur : " + (data.detail || "Une erreur est survenue");
+                    msgDiv.className = 'error';
+                    msgDiv.style.display = 'block';
+                }
+            } catch (error) {
+                msgDiv.textContent = "Impossible de contacter le serveur.";
+                msgDiv.className = 'error';
+                msgDiv.style.display = 'block';
+            } finally {
+                submitBtn.disabled = false;
+                btnText.style.display = 'block';
+                loader.style.display = 'none';
+            }
+        });
+    </script>
+
+</body>
+
+</html>

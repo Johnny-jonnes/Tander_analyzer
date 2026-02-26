@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyd
+*.pyo
+*.pdb
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+*.so
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+
+# Secrets & config locaux
+.env
+*.env.local
+supabase_password.txt
+
+# Logs & données temporaires
+logs/
+downloads/
+*.log
+*.txt
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Alembic versions (garder le dossier mais pas les __pycache__)
+alembic/versions/__pycache__/
+
+# Docker
+*.override.yml
