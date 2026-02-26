@@ -3,6 +3,7 @@
 Configuration centralisée - variables d'environnement
 """
 
+import os
 from functools import lru_cache
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -13,7 +14,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
-        case_sensitive=False,  # Important pour Railway/Cloud
+        case_sensitive=False,
         extra="ignore"
     )
 
@@ -24,11 +25,9 @@ class Settings(BaseSettings):
     LOG_LEVEL: str = "INFO"
 
     # --- Base de données ---
-    # Railway injecte souvent DATABASE_URL directement
     DATABASE_URL: str = ""
-    DIRECT_URL: str = ""
     
-    # Defaults pour dev local (Docker)
+    # Defaults pour dev local
     POSTGRES_USER: str = "tender_user"
     POSTGRES_PASSWORD: str = "tender_secret_password_2024"
     POSTGRES_DB: str = "tender_analyzer"
@@ -61,11 +60,17 @@ class Settings(BaseSettings):
 
     @property
     def database_url(self) -> str:
-        """Construit l'URL de connexion PostgreSQL ou utilise DATABASE_URL"""
+        """Priorité absolue à l'URL complète (DATABASE_URL)"""
+        # 1. Vérifier os.environ directement (priorité Railway)
+        env_url = os.environ.get("DATABASE_URL")
+        if env_url:
+            return env_url
+            
+        # 2. Vérifier l'attribut Pydantic (chargé via .env ou env vars)
         if self.DATABASE_URL:
-            # Correction Railway : parfois Railway double-encodes ou a des formats spécifiques
             return self.DATABASE_URL
         
+        # 3. Fallback sur les composants individuels
         return (
             f"postgresql://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}"
             f"@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"

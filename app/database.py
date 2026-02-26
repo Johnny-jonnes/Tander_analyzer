@@ -14,6 +14,16 @@ logger = logging.getLogger(__name__)
 settings = get_settings()
 
 # Création du moteur avec pool de connexions
+try:
+    from urllib.parse import urlparse
+    db_url = settings.database_url
+    parsed = urlparse(db_url)
+    # On log l'hôte de manière anonymisée (sauf si c'est 'db')
+    host_display = parsed.hostname or "inconnu"
+    logger.info(f"🔌 Tentative de connexion DB sur l'hôte: {host_display}")
+except Exception as e:
+    logger.error(f"❌ Erreur parsing DATABASE_URL: {e}")
+
 engine = create_engine(
     settings.database_url,
     pool_size=10,
