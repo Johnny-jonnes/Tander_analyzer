@@ -4,6 +4,7 @@ Configuration centralisée - variables d'environnement
 """
 
 import os
+import logging
 from functools import lru_cache
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -61,20 +62,42 @@ class Settings(BaseSettings):
     @property
     def database_url(self) -> str:
         """Priorité absolue à l'URL complète (DATABASE_URL)"""
+        _logger = logging.getLogger(__name__)
+        
+        url = None
+        source = ""
+        
         # 1. Vérifier os.environ directement (priorité Railway)
         env_url = os.environ.get("DATABASE_URL")
         if env_url:
-            return env_url
-            
+            url = env_url
+            source = "os.environ DATABASE_URL"
         # 2. Vérifier l'attribut Pydantic (chargé via .env ou env vars)
-        if self.DATABASE_URL:
-            return self.DATABASE_URL
+        elif self.DATABASE_URL:
+            url = self.DATABASE_URL
+            source = "Pydantic DATABASE_URL"
+        else:
+            # 3. Fallback sur les composants individuels
+            url = (
+                f"postgresql://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}"
+                f"@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
+            )
+            source = f"composants individuels (host={self.POSTGRES_HOST})"
         
-        # 3. Fallback sur les composants individuels
-        return (
-            f"postgresql://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}"
-            f"@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
-        )
+        # Correction Railway : postgres:// -> postgresql://
+        if url.startswith("postgres://"):
+            url = url.replace("postgres://", "postgresql://", 1)
+            _logger.info("🔧 Correction URL: postgres:// -> postgresql://")
+        
+        # Log anonymisé pour debug
+        try:
+            from urllib.parse import urlparse
+            parsed = urlparse(url)
+            _logger.info(f"📊 DB source: {source} | hôte: {parsed.hostname} | port: {parsed.port} | db: {parsed.path}")
+        except Exception:
+            pass
+        
+        return url
 
 
 @lru_cache()

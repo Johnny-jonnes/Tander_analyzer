@@ -3,9 +3,10 @@
 Configuration SQLAlchemy et gestion des sessions PostgreSQL
 """
 
+import time
 import logging
 from contextlib import contextmanager
-from sqlalchemy import create_engine, event
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import declarative_base, sessionmaker, Session
 from app.config import get_settings
 
@@ -13,23 +14,20 @@ logger = logging.getLogger(__name__)
 
 settings = get_settings()
 
-# Création du moteur avec pool de connexions
-try:
-    from urllib.parse import urlparse
-    db_url = settings.database_url
-    parsed = urlparse(db_url)
-    # On log l'hôte de manière anonymisée (sauf si c'est 'db')
-    host_display = parsed.hostname or "inconnu"
-    logger.info(f"🔌 Tentative de connexion DB sur l'hôte: {host_display}")
-except Exception as e:
-    logger.error(f"❌ Erreur parsing DATABASE_URL: {e}")
+# Log de l'URL utilisée
+db_url = settings.database_url
+logger.info(f"🔌 URL de connexion DB résolue (voir logs config pour détails)")
 
+# Création du moteur avec pool de connexions
 engine = create_engine(
-    settings.database_url,
-    pool_size=10,
-    max_overflow=20,
+    db_url,
+    pool_size=5,
+    max_overflow=10,
     pool_pre_ping=True,       # Vérifie la connexion avant utilisation
-    pool_recycle=3600,         # Recycle les connexions après 1h
+    pool_recycle=1800,         # Recycle les connexions après 30min
+    connect_args={
+        "connect_timeout": 10,  # Timeout de connexion 10s
+    },
     echo=settings.DEBUG,       # Log SQL en mode debug
 )
 
@@ -80,11 +78,33 @@ def get_db_context():
 
 def init_db():
     """
-    Crée toutes les tables en base.
+    Crée toutes les tables en base avec retry.
     À appeler au démarrage de l'application.
     """
     # Import tous les modèles pour que SQLAlchemy les enregistre
     from app.models import enterprise, tender, analysis, email_log  # noqa: F401
 
-    Base.metadata.create_all(bind=engine)
-    logger.info("✅ Tables créées avec succès")
+    max_retries = 5
+    retry_delay = 3  # secondes
+
+    for attempt in range(1, max_retries + 1):
+        try:
+            logger.info(f"🔌 Tentative de connexion DB ({attempt}/{max_retries})...")
+            # Test de connexion d'abord
+            with engine.connect() as conn:
+                conn.execute(text("SELECT 1"))
+            logger.info("✅ Connexion DB réussie")
+            
+            # Créer les tables
+            Base.metadata.create_all(bind=engine)
+            logger.info("✅ Tables créées/vérifiées avec succès")
+            return
+        except Exception as e:
+            logger.error(f"❌ Tentative {attempt}/{max_retries} échouée: {e}")
+            if attempt < max_retries:
+                logger.info(f"⏳ Retry dans {retry_delay}s...")
+                time.sleep(retry_delay)
+                retry_delay *= 2  # Backoff exponentiel
+            else:
+                logger.critical(f"💀 Impossible de se connecter à la DB après {max_retries} tentatives")
+                raise
