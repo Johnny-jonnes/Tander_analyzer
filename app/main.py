@@ -18,14 +18,19 @@ from app.routers import enterprises, tenders, analyses
 from app.scheduler.jobs import init_scheduler, shutdown_scheduler
 
 # Configuration du logging
+import os
+log_handlers = [logging.StreamHandler()]
+try:
+    os.makedirs("logs", exist_ok=True)
+    log_handlers.append(logging.FileHandler("logs/tender_analyzer.log", mode="a", encoding="utf-8"))
+except Exception:
+    pass  # Pas de fichier log si le dossier n'est pas accessible
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s | %(levelname)-8s | %(name)s | %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",
-    handlers=[
-        logging.StreamHandler(),
-        logging.FileHandler("logs/tender_analyzer.log", mode="a", encoding="utf-8"),
-    ],
+    handlers=log_handlers,
 )
 
 logger = logging.getLogger(__name__)
