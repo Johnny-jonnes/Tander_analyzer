@@ -180,7 +180,7 @@ class ReportGeneratorService:
                     item.get("budget_display", "N/A"),
                     item.get("deadline", "N/A")
                 ])
-            ot = Table(tdata, colWidths=[0.8*cm, 6*cm, 2*cm, 2.2*cm, 3*cm, 2*cm])
+            ot = Table(tdata, colWidths=[0.8*cm, 7.5*cm, 1.5*cm, 2.2*cm, 3*cm, 2*cm])
             ts = [
                 ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
                 ('FONTSIZE', (0,0), (-1,-1), 9),
@@ -247,7 +247,9 @@ class ReportGeneratorService:
             summary = best.get("summary", "")
             if summary:
                 elements.append(Spacer(1, 6))
-                elements.append(Paragraph(f"<b>Resume :</b><br/>{summary[:300]}", styles['Body']))
+                # Utilisation d'un style avec leading plus important et sans limite de caractères trop restrictive
+                summary_style = ParagraphStyle('Summary', parent=styles['Body'], fontSize=10, leading=14, alignment=0) # 0 = Left
+                elements.append(Paragraph(f"<b>Résumé :</b> {summary[:1000]}", summary_style))
 
         # Recommandations
         if recommendations:

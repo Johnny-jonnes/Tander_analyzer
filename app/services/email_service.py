@@ -147,19 +147,19 @@ class EmailService:
             level_txt = "#1b5e20" if score >= 70 else "#e65100" if score >= 40 else "#b71c1c"
 
             tender_rows += f"""
-            <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:14px;background:#ffffff;border-radius:16px;border:1px solid #eaedf2;overflow:hidden;box-shadow:0 2px 14px rgba(0,0,0,0.06);">
+            <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:18px;background:#ffffff;border-radius:16px;border:1px solid #eaedf2;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.05);">
               <tr>
-                <td width="88" style="padding:22px 0 22px 16px;vertical-align:top;text-align:center;">
-                  <table cellpadding="0" cellspacing="0" style="margin:0 auto;"><tr><td style="width:62px;height:62px;border-radius:50%;background:{score_color}1a;border:2.5px solid {score_color}55;text-align:center;vertical-align:middle;">
-                    <span style="font-size:16px;font-weight:900;color:{score_color};font-family:-apple-system,BlinkMacSystemFont,sans-serif;letter-spacing:-0.5px;">{score:.0f}</span><br>
+                <td width="88" style="padding:24px 0 24px 16px;vertical-align:top;text-align:center;">
+                  <table cellpadding="0" cellspacing="0" style="margin:0 auto;"><tr><td style="width:64px;height:64px;border-radius:50%;background:{score_color}1a;border:2px solid {score_color}44;text-align:center;vertical-align:middle;">
+                    <span style="font-size:18px;font-weight:900;color:{score_color};font-family:-apple-system,BlinkMacSystemFont,sans-serif;">{score:.0f}</span><br>
                     <span style="font-size:9px;font-weight:700;color:{score_color}99;text-transform:uppercase;font-family:-apple-system,sans-serif;">/100</span>
                   </td></tr></table>
                 </td>
-                <td style="padding:18px 18px 18px 10px;vertical-align:top;">
-                  <span style="display:inline-block;padding:3px 10px;border-radius:20px;background:{level_bg};font-size:10px;font-weight:700;color:{level_txt};font-family:-apple-system,sans-serif;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:8px;">{level_label}</span>
-                  <p style="margin:0 0 7px 0;font-size:14px;font-weight:700;color:#0d1117;line-height:1.4;font-family:-apple-system,BlinkMacSystemFont,sans-serif;">{clean_title}</p>
-                  <p style="margin:0 0 14px 0;font-size:12px;color:#6b7280;line-height:1.6;font-family:-apple-system,BlinkMacSystemFont,sans-serif;">{clean_summary}</p>
-                  <a href="{btn_url}" target="_blank" style="display:inline-block;background:#0d1117;color:#ffffff;padding:9px 18px;border-radius:100px;text-decoration:none;font-size:12px;font-weight:600;font-family:-apple-system,BlinkMacSystemFont,sans-serif;">Voir l'offre &rarr;</a>
+                <td style="padding:20px 20px 20px 10px;vertical-align:top;">
+                  <span style="display:inline-block;padding:4px 12px;border-radius:20px;background:{level_bg};font-size:10px;font-weight:700;color:{level_txt};font-family:-apple-system,sans-serif;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">{level_label}</span>
+                  <p style="margin:0 0 8px 0;font-size:15px;font-weight:700;color:#0d1117;line-height:1.4;font-family:-apple-system,BlinkMacSystemFont,sans-serif;">{clean_title}</p>
+                  <p style="margin:0 0 16px 0;font-size:13px;color:#4b5563;line-height:1.6;font-family:-apple-system,BlinkMacSystemFont,sans-serif;">{clean_summary}</p>
+                  <a href="{btn_url}" target="_blank" style="display:inline-block;background:#0d1117;color:#ffffff;padding:10px 24px;border-radius:100px;text-decoration:none;font-size:13px;font-weight:600;font-family:-apple-system,BlinkMacSystemFont,sans-serif;-webkit-font-smoothing:antialiased;">Voir l'offre &rarr;</a>
                 </td>
               </tr>
             </table>"""
