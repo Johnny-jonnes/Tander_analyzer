@@ -43,7 +43,7 @@ def create_enterprise(
     # ── Limitation des secteurs selon le plan ──
     plan = (enterprise_data.subscription_plan or "PASS").upper()
     plan_config = SUBSCRIPTION_PLANS.get(plan, SUBSCRIPTION_PLANS["PASS"])
-    max_sectors = plan_config["max_sectors"]
+    max_sectors = int(plan_config["max_sectors"])
 
     sector_raw = enterprise_data.sector or ""
     sectors_list = [s.strip() for s in sector_raw.split(",") if s.strip()]
@@ -90,7 +90,8 @@ async def upload_logo(
     filename = f"logo_{enterprise_id}_{uuid.uuid4().hex[:8]}.{ext}"
     filepath = os.path.join(LOGO_DIR, filename)
     with open(filepath, "wb") as f:
-        f.write(content)
+        content_bytes: bytes = content  # type: ignore
+        f.write(content_bytes)
     enterprise.logo_url = f"/static/logos/{filename}"
     db.commit()
     db.refresh(enterprise)

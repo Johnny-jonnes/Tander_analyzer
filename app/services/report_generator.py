@@ -64,10 +64,10 @@ class ReportGeneratorService:
         if not enterprise:
             return {"error": "Entreprise non trouvee"}
         scored_analyses = self.scorer.score_all_for_enterprise(enterprise)
-        report = {
+        report: dict = {
             "generated_at": datetime.utcnow().isoformat(),
             "enterprise": {"id": enterprise.id, "name": enterprise.name, "sector": enterprise.sector, "budget_range": f"{self._fmt_gnf(enterprise.min_budget)} - {self._fmt_gnf(enterprise.max_budget)}", "zones": enterprise.zones, "experience_years": enterprise.experience_years},
-            "summary": {"total_tenders_analyzed": len(scored_analyses), "high_match": len([s for s in scored_analyses if s["score"] >= 70]), "medium_match": len([s for s in scored_analyses if 40 <= s["score"] < 70]), "low_match": len([s for s in scored_analyses if s["score"] < 40]), "average_score": round(sum(s["score"] for s in scored_analyses) / len(scored_analyses), 1) if scored_analyses else 0},
+            "summary": {"total_tenders_analyzed": len(scored_analyses), "high_match": len([s for s in scored_analyses if s["score"] >= 70]), "medium_match": len([s for s in scored_analyses if 40 <= s["score"] < 70]), "low_match": len([s for s in scored_analyses if s["score"] < 40]), "average_score": round(float(sum(s["score"] for s in scored_analyses)) / len(scored_analyses), 1) if scored_analyses else 0.0},
             "top_opportunities": [],
         }
         for item in scored_analyses[:20]:
@@ -267,7 +267,7 @@ class ReportGeneratorService:
         high = len([s for s in scored if s["score"] >= 70])
         medium = len([s for s in scored if 40 <= s["score"] < 70])
         low = len([s for s in scored if s["score"] < 40])
-        avg = round(sum(s["score"] for s in scored) / total, 1) if total else 0
+        avg = round(float(sum(s["score"] for s in scored)) / total, 1) if total else 0.0
 
         elements.append(Paragraph("SOMMAIRE EXECUTIF", S['section_label']))
         elements.append(Paragraph("Vue d'ensemble de l'analyse", S['section_title']))
@@ -448,7 +448,7 @@ class ReportGeneratorService:
                 # Fond
                 d.add(Rect(0, 2, 380, 8, fillColor=LIGHT_GRAY, strokeColor=None, rx=4, ry=4))
                 # Barre remplie
-                bar_w = max(6, 380 * value / 100)
+                bar_w = int(max(6.0, 380.0 * value / 100))
                 d.add(Rect(0, 2, bar_w, 8, fillColor=HexColor(val_hex), strokeColor=None, rx=4, ry=4))
                 elements.append(d)
 

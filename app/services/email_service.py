@@ -170,7 +170,7 @@ class EmailService:
         reco_section = ""
         if recommendations:
             reco_items = ""
-            for i, reco in enumerate(recommendations, 1):
+            for i, reco in enumerate(recommendations or [], 1):
                 clean_reco = self._clean_text(reco)
                 reco_items += f"""
                 <tr><td style="padding:12px 0;border-bottom:1px solid #f0f2f8;">
@@ -288,10 +288,13 @@ class EmailService:
             response.raise_for_status()
             logger.info(f"Email envoye via API Mailjet a {to_email}")
             return True
+        except requests.exceptions.HTTPError as e:
+            logger.error(f"Echec HTTP Mailjet: {e}")
+            if e.response is not None:
+                logger.error(f"Response Mailjet: {e.response.text}")
+            raise
         except Exception as e:
             logger.error(f"Echec envoi API Mailjet: {e}")
-            if hasattr(e, 'response') and e.response is not None:
-                logger.error(f"Response Mailjet: {e.response.text}")
             raise
 
     # ------------------------------------------------------------------

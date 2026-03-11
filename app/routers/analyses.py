@@ -195,7 +195,7 @@ def run_test_cycle_for_enterprise(enterprise_id: int, db: Session = Depends(get_
     try:
         from app.services.pdf_parser import PDFParserService
         pdf_parser = PDFParserService()
-        parsed = 0
+        parsed: int = 0
         from app.models.tender import Tender
         unparsed = db.query(Tender).filter(Tender.raw_text.is_(None), Tender.pdf_path.isnot(None)).all()
         for t in unparsed:

@@ -1,0 +1,22 @@
+{
+  "venvPath": ".",
+  "venv": "venv",
+  "pythonVersion": "3.11",
+  "typeCheckingMode": "basic",
+  "reportMissingImports": false,
+  "reportMissingModuleSource": false,
+  "reportGeneralTypeIssues": false,
+  "reportArgumentType": false,
+  "reportReturnType": false,
+  "reportAttributeAccessIssue": false,
+  "reportOperatorIssue": false,
+  "reportOptionalMemberAccess": false,
+  "reportCallIssue": false,
+  "extraPaths": ["."],
+  "executionEnvironments": [
+    {
+      "root": ".",
+      "extraPaths": ["."]
+    }
+  ]
+}

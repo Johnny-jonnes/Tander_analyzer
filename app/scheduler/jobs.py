@@ -53,7 +53,7 @@ def job_daily_cycle():
             # Etape 2 : Parsing PDF
             logger.info("Etape 2/4 : Extraction texte des PDFs...")
             pdf_parser = PDFParserService()
-            parsed_count = 0
+            parsed_count: int = 0
             for tender in new_tenders:
                 if tender.pdf_path:
                     text = pdf_parser.extract_text(tender.pdf_path)
@@ -136,7 +136,7 @@ def job_elite_realtime_alert():
 
             scorer = ScorerService(db)
             email_service = EmailService(db)
-            alerts_sent = 0
+            alerts_sent: int = 0
 
             for enterprise in elite_enterprises:
                 try:
