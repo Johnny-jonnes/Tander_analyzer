@@ -41,25 +41,31 @@ def create_enterprise(
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=f"L'entreprise '{enterprise_data.name}' existe deja (id={existing.id})")
 
     # ── Limitation des secteurs selon le plan ──
-    plan = (enterprise_data.subscription_plan or "PASS").upper()
-    plan_config = SUBSCRIPTION_PLANS.get(plan, SUBSCRIPTION_PLANS["PASS"])
+    client_plan = (enterprise_data.subscription_plan or "PASS").upper()
+    plan_config = SUBSCRIPTION_PLANS.get(client_plan, SUBSCRIPTION_PLANS["PASS"])
     max_sectors = int(plan_config["max_sectors"])
 
     sector_raw = enterprise_data.sector or ""
     sectors_list = [s.strip() for s in sector_raw.split(",") if s.strip()]
 
     if len(sectors_list) > max_sectors:
-        logger.info(f"Plan {plan} : {len(sectors_list)} secteurs fournis, limite a {max_sectors}")
+        logger.info(f"Plan {client_plan} : {len(sectors_list)} secteurs fournis, limite a {max_sectors}")
         sectors_list = sectors_list[:max_sectors]
 
     data = enterprise_data.model_dump()
     data["sector"] = ", ".join(sectors_list) if sectors_list else sector_raw
+    
+    # Gestion du statut en attente pour les plans payants
+    if client_plan in ["ENTRY", "ELITE"]:
+        data["subscription_plan"] = f"PENDING_{client_plan}"
+    else:
+        data["subscription_plan"] = "PASS"
 
     enterprise = Enterprise(**data)
     db.add(enterprise)
     db.commit()
     db.refresh(enterprise)
-    logger.info(f"Entreprise creee: {enterprise.name} (id={enterprise.id}, plan={plan}, secteurs={len(sectors_list)})")
+    logger.info(f"Entreprise creee: {enterprise.name} (id={enterprise.id}, plan={data['subscription_plan']}, secteurs={len(sectors_list)})")
     try:
         email_service = EmailService(db)
         email_service.send_welcome_email(enterprise)

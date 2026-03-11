@@ -326,8 +326,30 @@ class EmailService:
     def send_welcome_email(self, enterprise: Enterprise) -> bool:
         if not enterprise.email:
             return False
+            
+        plan = getattr(enterprise, 'subscription_plan', 'PASS') or 'PASS'
+        plan_base = plan.replace("PENDING_", "")
+        is_pending = plan.startswith("PENDING_")
+            
         subject = f"Bienvenue sur NOBILIS X - {enterprise.name}"
         clean_name = self._clean_text(enterprise.name)
+        
+        if is_pending:
+            amount = "3 500 000" if plan_base == "ELITE" else "1 500 000"
+            message_body = f"""
+    <p style="color: #c9d1d9; line-height: 1.6;">Votre pré-inscription pour le plan <strong>NOBILIS {plan_base}</strong> a bien été enregistrée.</p>
+    <div style="background: rgba(201,168,76,0.1); border: 1px solid #c9a84c; padding: 16px; border-radius: 8px; margin: 20px 0;">
+        <h3 style="color: #c9a84c; margin-top: 0;">Action requise : Paiement Orange Money</h3>
+        <p style="color: #fff; line-height: 1.6; margin-bottom: 0;">Pour activer votre abonnement et commencer à recevoir vos rapports, veuillez effectuer un dépôt de <strong>{amount} GNF</strong> au numéro suivant :</p>
+        <p style="color: #c9a84c; font-size: 24px; font-weight: bold; text-align: center; margin: 10px 0;">+224 627 27 13 97</p>
+        <p style="color: #8b949e; font-size: 13px; margin: 0; text-align: center;">Veuillez nous envoyer une capture d'écran du paiement sur WhatsApp à ce même numéro pour une activation immédiate.</p>
+    </div>
+            """
+        else:
+            message_body = """
+    <p style="color: #c9d1d9; line-height: 1.6;">Votre inscription est confirmée. Vous recevrez désormais vos rapports personnalisés chaque matin à 8h00.</p>
+    <p style="color: #c9d1d9; line-height: 1.6;">NOBILIS X analyse en continu les sources officielles (JAO, DGCMP, TELEMO) et calcule votre <strong style="color: #c9a84c;">Indice de Crédibilité</strong> pour chaque opportunité.</p>
+            """
         
         html_body = f"""<!DOCTYPE html>
 <html lang="fr"><body style="font-family: -apple-system, BlinkMacSystemFont, sans-serif; padding: 20px; background: #0d1117; color: #fff;">
@@ -335,8 +357,7 @@ class EmailService:
     <h1 style="color: #c9a84c; font-size: 28px; margin: 0 0 4px 0;">NOBILIS X</h1>
     <p style="color: #8b949e; font-size: 12px; margin: 0 0 24px 0; letter-spacing: 1px;">L'INTELLIGENCE DES MARCHÉS</p>
     <h2 style="color: #fff; font-size: 20px;">Bienvenue {clean_name} !</h2>
-    <p style="color: #c9d1d9; line-height: 1.6;">Votre inscription est confirmée. Vous recevrez désormais vos rapports personnalisés chaque matin à 8h00.</p>
-    <p style="color: #c9d1d9; line-height: 1.6;">NOBILIS X analyse en continu les sources officielles (JAO, DGCMP, TELEMO) et calcule votre <strong style="color: #c9a84c;">Indice de Crédibilité</strong> pour chaque opportunité.</p>
+    {message_body}
     <hr style="border: 1px solid #30363d; margin: 24px 0;">
     <p style="color: #8b949e; font-size: 13px;">📧 trillionnx@gmail.com | 📞 +224 627 27 13 97</p>
     <p style="color: #8b949e; font-size: 12px;">Fait en Guinée. Conçu pour que les meilleurs gagnent.</p>
@@ -374,8 +395,15 @@ class EmailService:
 
         for enterprise in enterprises:
             try:
-                # Bloquer les PASS expirés (essai de 2 jours)
+                # Bloquer les envois aux comptes en attente de paiement
                 plan = getattr(enterprise, 'subscription_plan', 'PASS') or 'PASS'
+                
+                if plan.upper().startswith("PENDING_"):
+                    logger.info(f"Paiement en attente pour {enterprise.name} ({plan}) — rapport ignore")
+                    results["skipped"] += 1
+                    continue
+                
+                # Bloquer les PASS expirés (essai de 2 jours)
                 if plan.upper() == "PASS":
                     from datetime import datetime as dt
                     if dt.utcnow() > enterprise.created_at + timedelta(days=2):

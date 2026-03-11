@@ -7,6 +7,8 @@
     <title>NOBILIS X — Système Expert de Veille & Analyse des Appels d'Offres</title>
     <meta name="description" content="NOBILIS X : L'intelligence des marchés publics en Guinée. Surveillance centralisée, analyse IA, Indice de Crédibilité — Ne manquez plus jamais un contrat.">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
     <style>
         :root {
             --gold: #c9a84c;
@@ -357,6 +359,30 @@
         .form-group select option { background: var(--bg-dark); color: var(--text-primary); }
 
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+        /* Choices.js Dark Theme Overrides */
+        .choices[data-type*="select-multiple"] .choices__inner {
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 4px 8px;
+            min-height: 50px;
+        }
+        .choices.is-focused .choices__inner {
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(201,168,76,0.1);
+        }
+        .choices__input { background: transparent; color: var(--text-primary); margin-bottom: 0px; }
+        .choices__list--dropdown {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 12px; color: var(--text-primary);
+        }
+        .choices__list--dropdown .choices__item--selectable.is-highlighted {
+            background: rgba(201,168,76,0.1); color: var(--gold);
+        }
+        .choices__button { 
+            border-left: 1px solid rgba(255,255,255,0.2) !important; 
+        }
 
         /* Plan selector */
         .plan-selector { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px; }
@@ -747,9 +773,9 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="sector">Secteur d'Activité</label>
-                        <select id="sector" name="sector" required>
-                            <option value="">Sélectionnez un secteur</option>
+                        <label for="sector">Secteurs d'Activité</label>
+                        <select id="sector" name="sector" multiple required>
+                            <option value="">Sélectionnez vos secteurs</option>
                             <option value="Agriculture, Peche & Developpement Rural">Agriculture, Pêche & Développement Rural</option>
                             <option value="Agroalimentaire & Transformation">Agroalimentaire & Transformation</option>
                             <option value="Communication, Medias & Publicite">Communication, Médias & Publicité</option>
@@ -867,11 +893,32 @@
     </footer>
 
     <script>
+        // === INITIALISATION CHOICES.JS ===
+        const sectorSelectEl = document.getElementById('sector');
+        const sectorChoices = new Choices(sectorSelectEl, {
+            removeItemButton: true,
+            maxItemCount: 3, // Défaut pour le PASS
+            searchEnabled: true,
+            placeholderValue: 'Cliquer pour choisir...',
+            itemSelectText: '',
+            noResultsText: 'Aucun résultat trouvé',
+            noChoicesText: 'Tous les secteurs ont été ajoutés'
+        });
+
         // === PLAN SELECTOR ===
         function selectPlan(plan) {
             document.querySelectorAll('.plan-option').forEach(p => p.classList.remove('active'));
             document.querySelector(`.plan-option[data-plan="${plan}"]`).classList.add('active');
             document.getElementById('subscription_plan').value = plan;
+
+            // Mise à jour de la limite de secteurs
+            const limits = { 'PASS': 3, 'ENTRY': 5, 'ELITE': 20 };
+            sectorChoices.config.maxItemCount = limits[plan];
+            
+            const selectedCount = sectorChoices.getValue(true).length;
+            if (selectedCount > limits[plan]) {
+                alert(`Attention: Le plan ${plan} ne permet de choisir que ${limits[plan]} secteur(s). Veuillez en retirer.`);
+            }
         }
 
         // Pricing buttons auto-select plan
@@ -939,9 +986,20 @@
             loader.style.display = 'block';
             msgDiv.style.display = 'none';
 
+            const selectedSectors = sectorChoices.getValue(true);
+            if (selectedSectors.length === 0) {
+                msgDiv.innerHTML = "Veuillez sélectionner au moins un secteur.";
+                msgDiv.className = 'msg-error';
+                msgDiv.style.display = 'block';
+                submitBtn.disabled = false;
+                btnText.style.display = 'block';
+                loader.style.display = 'none';
+                return;
+            }
+
             const formData = {
                 name: document.getElementById('name').value,
-                sector: document.getElementById('sector').value,
+                sector: selectedSectors.join(', '),
                 email: document.getElementById('email').value,
                 zones: document.getElementById('zones').value,
                 specific_keywords: document.getElementById('specific_keywords').value,
@@ -974,12 +1032,28 @@
                         } catch (logoErr) { console.warn('Erreur upload logo:', logoErr); }
                     }
 
-                    const planName = formData.subscription_plan === 'ELITE' ? 'NOBILIS ELITE ★' :
-                                     formData.subscription_plan === 'ENTRY' ? 'NOBILIS ENTRY' : 'NOBILIS PASS';
-                    msgDiv.innerHTML = `✅ Bienvenue dans le cercle NOBILIS X !<br>Plan <strong>${planName}</strong> activé.<br>Vous recevrez votre premier rapport demain à 8h00.`;
-                    msgDiv.className = 'msg-success';
+                    const subPlan = formData.subscription_plan;
+                    const planName = subPlan === 'ELITE' ? 'NOBILIS ELITE ★' :
+                                     subPlan === 'ENTRY' ? 'NOBILIS ENTRY' : 'NOBILIS PASS';
+                                     
+                    if (subPlan === 'PASS') {
+                        msgDiv.innerHTML = `✅ Bienvenue dans le cercle NOBILIS X !<br>Plan <strong>${planName}</strong> activé avec trial de 2 jours.<br>Vous recevrez votre premier rapport demain à 8h00.`;
+                        msgDiv.className = 'msg-success';
+                    } else {
+                        const amount = subPlan === 'ELITE' ? '3 500 000 GNF' : '1 500 000 GNF';
+                        msgDiv.innerHTML = `✅ Pré-inscription réussie !<br><br>
+                        Pour activer votre plan <strong>${planName}</strong>, veuillez effectuer un dépôt Orange Money de <strong>${amount}</strong> au numéro : <br>
+                        <strong style="font-size: 1.2rem; color: var(--gold);">+224 627 27 13 97</strong><br><br>
+                        Votre compte sera validé dès réception du paiement.`;
+                        msgDiv.className = 'msg-error';
+                        msgDiv.style.backgroundColor = 'rgba(201,168,76,0.1)';
+                        msgDiv.style.borderColor = 'var(--gold)';
+                        msgDiv.style.color = '#fff';
+                    }
+                    
                     msgDiv.style.display = 'block';
                     form.reset();
+                    sectorChoices.removeActiveItems();
                     logoPreview.style.display = 'none';
                     logoFilename.style.display = 'none';
                     logoDropArea.classList.remove('has-file');
