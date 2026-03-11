@@ -373,6 +373,8 @@
             box-shadow: 0 0 0 3px rgba(201,168,76,0.1);
         }
         .choices__input { background: transparent; color: var(--text-primary); margin-bottom: 0px; }
+        
+        /* Dropdown list */
         .choices__list--dropdown {
             background: var(--bg-card); border: 1px solid var(--border);
             border-radius: 12px; color: var(--text-primary);
@@ -380,8 +382,21 @@
         .choices__list--dropdown .choices__item--selectable.is-highlighted {
             background: rgba(201,168,76,0.1); color: var(--gold);
         }
-        .choices__button { 
-            border-left: 1px solid rgba(255,255,255,0.2) !important; 
+        
+        /* Selected items (tags) */
+        .choices__list--multiple .choices__item {
+            background-color: var(--gold);
+            border: 1px solid var(--gold-dark);
+            color: #000; /* Texte noir pour que ce soit lisible sur le fond doré */
+            font-weight: 600;
+            border-radius: 8px;
+        }
+        .choices__list--multiple .choices__item[data-deletable] {
+            padding-right: 30px;
+        }
+        .choices[data-type*="select-multiple"] .choices__button { 
+            border-left: 1px solid rgba(0,0,0,0.2) !important; 
+            background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='21' height='21' viewBox='0 0 21 21'%3E%3Cpath stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m15.75 5.25-10.5 10.5M5.25 5.25l10.5 10.5'/%3E%3C/svg%3E"); /* Croix noire */
         }
 
         /* Plan selector */
