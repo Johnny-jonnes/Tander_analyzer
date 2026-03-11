@@ -13,6 +13,7 @@ from app.database import get_db
 from app.models.enterprise import Enterprise
 from app.schemas.enterprise import EnterpriseCreate, EnterpriseResponse, EnterpriseUpdate
 from app.services.email_service import EmailService
+from app.models.subscription import SUBSCRIPTION_PLANS
 
 logger = logging.getLogger(__name__)
 
@@ -38,11 +39,27 @@ def create_enterprise(
     existing = db.query(Enterprise).filter(Enterprise.name == enterprise_data.name).first()
     if existing:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=f"L'entreprise '{enterprise_data.name}' existe deja (id={existing.id})")
-    enterprise = Enterprise(**enterprise_data.model_dump())
+
+    # ── Limitation des secteurs selon le plan ──
+    plan = (enterprise_data.subscription_plan or "PASS").upper()
+    plan_config = SUBSCRIPTION_PLANS.get(plan, SUBSCRIPTION_PLANS["PASS"])
+    max_sectors = plan_config["max_sectors"]
+
+    sector_raw = enterprise_data.sector or ""
+    sectors_list = [s.strip() for s in sector_raw.split(",") if s.strip()]
+
+    if len(sectors_list) > max_sectors:
+        logger.info(f"Plan {plan} : {len(sectors_list)} secteurs fournis, limite a {max_sectors}")
+        sectors_list = sectors_list[:max_sectors]
+
+    data = enterprise_data.model_dump()
+    data["sector"] = ", ".join(sectors_list) if sectors_list else sector_raw
+
+    enterprise = Enterprise(**data)
     db.add(enterprise)
     db.commit()
     db.refresh(enterprise)
-    logger.info(f"Entreprise creee: {enterprise.name} (id={enterprise.id})")
+    logger.info(f"Entreprise creee: {enterprise.name} (id={enterprise.id}, plan={plan}, secteurs={len(sectors_list)})")
     try:
         email_service = EmailService(db)
         email_service.send_welcome_email(enterprise)

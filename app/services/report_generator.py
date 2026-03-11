@@ -76,8 +76,10 @@ class ReportGeneratorService:
             report["top_opportunities"].append({"tender_id": item["tender_id"], "title": item["tender_title"], "score": item["score"], "score_details": item["details"], "summary": analysis.summary if analysis else None, "sector": tender.sector if tender else None, "budget": tender.estimated_budget if tender else None, "location": tender.location if tender else None, "deadline": tender.deadline.isoformat() if tender and tender.deadline else None, "source_url": tender.source_url if tender else None})
         return report
 
-    def generate_pdf_report(self, enterprise_id: int, recommendations: list[str] | None = None) -> str | None:
-        """Genere un rapport PDF premium."""
+    def generate_pdf_report(self, enterprise_id: int, recommendations: list[str] | None = None, subscription_plan: str = "ENTRY") -> str | None:
+        """Genere un rapport PDF premium. Le contenu varie selon le plan."""
+        plan = (subscription_plan or "ENTRY").upper()
+        is_elite = plan == "ELITE"
         try:
             from reportlab.lib.pagesizes import A4
             from reportlab.lib.units import cm, mm
@@ -498,6 +500,31 @@ class ReportGeneratorService:
                 ]))
                 elements.append(reco_tbl)
                 elements.append(Spacer(1, 2*mm))
+
+        # ── Upsell ENTRY → ELITE ──
+        if not is_elite:
+            elements.append(Spacer(1, 6*mm))
+            upsell_data = [[
+                Paragraph(
+                    '<font color="#C9A84C" size="9"><b>PASSEZ A NOBILIS ELITE</b></font><br/>'
+                    '<font color="#636E72" size="8">'
+                    'Debloquez les recommandations strategiques detaillees, '
+                    'l\'alerte temps reel et la couverture des 20 secteurs. '
+                    'Contactez-nous : +224 627 27 13 97 ou trillionnx@gmail.com'
+                    '</font>',
+                    ParagraphStyle('Upsell', leading=13)
+                )
+            ]]
+            upsell_tbl = Table(upsell_data, colWidths=[15.7*cm])
+            upsell_tbl.setStyle(TableStyle([
+                ('BACKGROUND', (0,0), (-1,-1), HexColor("#FFF8E1")),
+                ('BOX', (0,0), (-1,-1), 1, GOLD),
+                ('TOPPADDING', (0,0), (-1,-1), 14),
+                ('BOTTOMPADDING', (0,0), (-1,-1), 14),
+                ('LEFTPADDING', (0,0), (-1,-1), 14),
+                ('RIGHTPADDING', (0,0), (-1,-1), 14),
+            ]))
+            elements.append(upsell_tbl)
 
         # ── Footer final ──
         elements.append(Spacer(1, 10*mm))

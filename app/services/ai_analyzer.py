@@ -291,27 +291,61 @@ JSON :"""
         logger.info(f"{len(analyses)} analyses terminees")
         return analyses
 
-    def generate_budget_recommendations(self, enterprise, top_scored: list[dict]) -> list[str]:
-        """Genere 3-5 recommandations personnalisees basees sur le budget et le profil."""
+    def generate_budget_recommendations(self, enterprise, top_scored: list[dict], subscription_plan: str = "ENTRY") -> list[str]:
+        """Genere des recommandations personnalisees.
+        - ENTRY : 2 recommandations courtes (economise les tokens Groq)
+        - ELITE : 5 recommandations strategiques detaillees
+        """
+        plan = (subscription_plan or "ENTRY").upper()
+        is_elite = plan == "ELITE"
+
         try:
+            nb_opps = 5 if is_elite else 2
             opps = ""
-            for i, item in enumerate(top_scored[:5], 1):
+            for i, item in enumerate(top_scored[:nb_opps], 1):
                 opps += f"{i}. {item.get('tender_title', 'N/A')[:80]} (Score: {item.get('score', 0):.0f}/100)\n"
 
-            system_prompt = "Tu es un conseiller expert en marches publics. Tu donnes des recommandations concretes et actionnables en francais. Tu ne dois JAMAIS utiliser d'emojis."
-            user_prompt = f"""Profil entreprise :
+            if is_elite:
+                system_prompt = (
+                    "Tu es un consultant senior en strategie de marches publics pour un cabinet de conseil international. "
+                    "Tu fournis des recommandations strategiques detaillees, concretes et actionnables en francais. "
+                    "Chaque recommandation doit contenir : l'opportunite, la justification et le potentiel estime. "
+                    "Tu ne dois JAMAIS utiliser d'emojis."
+                )
+                user_prompt = f"""Profil entreprise :
 - Nom : {enterprise.name}
 - Secteur : {enterprise.sector}
-- Budget : {enterprise.min_budget} - {enterprise.max_budget} USD
+- Budget : {enterprise.min_budget} - {enterprise.max_budget} GNF
+- Zones : {enterprise.zones or 'Non precisees'}
+- Experience : {enterprise.experience_years} ans
+
+Top {nb_opps} opportunites :
+{opps or 'Aucune.'}
+
+En tant que consultant senior, donne exactement 5 recommandations strategiques detaillees.
+Pour chaque recommandation, explique :
+1. L'action concrete a mener
+2. Pourquoi cette action est pertinente pour ce profil
+3. Le potentiel de reussite estime
+
+Format : liste numerotee, 3-4 phrases par recommandation. Pas d'introduction, pas de conclusion."""
+                max_tokens = 1200
+            else:
+                system_prompt = "Tu es un conseiller en marches publics. Tu donnes des recommandations concretes et courtes en francais. Tu ne dois JAMAIS utiliser d'emojis."
+                user_prompt = f"""Profil entreprise :
+- Nom : {enterprise.name}
+- Secteur : {enterprise.sector}
+- Budget : {enterprise.min_budget} - {enterprise.max_budget} GNF
 - Zones : {enterprise.zones or 'Non precisees'}
 - Experience : {enterprise.experience_years} ans
 
 Meilleures opportunites :
 {opps or 'Aucune.'}
 
-Donne exactement 3 a 5 recommandations courtes (max 2 phrases chacune). Pas d'introduction, pas de conclusion, juste une liste numerotee."""
+Donne exactement 2 recommandations courtes (max 2 phrases chacune). Pas d'introduction, pas de conclusion, juste une liste numerotee."""
+                max_tokens = 400
 
-            response = self._call_groq(system_prompt, user_prompt, max_tokens=600)
+            response = self._call_groq(system_prompt, user_prompt, max_tokens=max_tokens)
             recommendations = []
             for line in response.strip().split("\n"):
                 line = line.strip()
@@ -319,11 +353,12 @@ Donne exactement 3 a 5 recommandations courtes (max 2 phrases chacune). Pas d'in
                     clean = line.lstrip("0123456789").lstrip(".").lstrip(")").strip()
                     if clean:
                         recommendations.append(clean)
-            return recommendations[:5] if recommendations else [response.strip()]
+
+            limit = 5 if is_elite else 2
+            return recommendations[:limit] if recommendations else [response.strip()]
         except Exception as e:
             logger.error(f"Erreur recommandations: {e}")
             return [
                 "Consultez regulierement les nouveaux appels d'offres pour ne pas manquer d'opportunites.",
                 "Preparez vos dossiers de candidature a l'avance pour reagir rapidement.",
-                "Adaptez votre budget previsionnel aux fourchettes des appels d'offres de votre secteur.",
             ]

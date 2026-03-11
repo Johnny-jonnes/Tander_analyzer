@@ -357,6 +357,7 @@ class EmailService:
             return False
 
     def send_all_daily_reports(self) -> dict:
+        from datetime import timedelta
         from app.services.scorer import ScorerService
         from app.services.ai_analyzer import AIAnalyzerService
         from app.services.report_generator import ReportGeneratorService
@@ -370,6 +371,15 @@ class EmailService:
 
         for enterprise in enterprises:
             try:
+                # Bloquer les PASS expirés (essai de 2 jours)
+                plan = getattr(enterprise, 'subscription_plan', 'PASS') or 'PASS'
+                if plan.upper() == "PASS":
+                    from datetime import datetime as dt
+                    if dt.utcnow() > enterprise.created_at + timedelta(days=2):
+                        logger.info(f"PASS expire pour {enterprise.name} — rapport ignore")
+                        results["skipped"] += 1
+                        continue
+
                 scored = scorer.score_all_for_enterprise(enterprise)
                 if not scored:
                     results["skipped"] += 1
@@ -379,17 +389,26 @@ class EmailService:
                     analysis = self.db.query(Analysis).filter(Analysis.tender_id == item["tender_id"]).first()
                     if analysis: item["summary"] = analysis.summary or ""
                 
+                # Recommandations IA adaptees au plan
                 reco = None
-                try: reco = ai_service.generate_budget_recommendations(enterprise, scored[:5])
-                except: pass
+                try:
+                    reco = ai_service.generate_budget_recommendations(
+                        enterprise, scored[:5], subscription_plan=plan
+                    )
+                except Exception:
+                    pass
 
                 pdf_path = None
-                try: pdf_path = report_service.generate_pdf_report(enterprise.id, recommendations=reco)
-                except: pass
+                try:
+                    pdf_path = report_service.generate_pdf_report(
+                        enterprise.id, recommendations=reco, subscription_plan=plan
+                    )
+                except Exception:
+                    pass
 
                 success = self.send_daily_report(enterprise, scored, recommendations=reco, pdf_path=pdf_path)
                 results["sent" if success else "failed"] += 1
-            except:
+            except Exception:
                 results["failed"] += 1
 
         return results
