@@ -925,7 +925,10 @@
             placeholderValue: 'Cliquer pour choisir...',
             itemSelectText: '',
             noResultsText: 'Aucun résultat trouvé',
-            noChoicesText: 'Tous les secteurs ont été ajoutés'
+            noChoicesText: 'Tous les secteurs ont été ajoutés',
+            maxItemText: (maxItemCount) => {
+                return `Vous ne pouvez pas ajouter plus de ${maxItemCount} secteur(s)`;
+            }
         });
 
         // === PLAN SELECTOR ===
