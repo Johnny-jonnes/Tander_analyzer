@@ -20,8 +20,10 @@ class Settings(BaseSettings):
     )
 
     # --- Application ---
-    APP_NAME: str = "Tender Analyzer MVP"
-    APP_VERSION: str = "1.0.0"
+    APP_NAME: str = "NOBILIS X"
+    APP_VERSION: str = "2.0.0"
+    CONTACT_EMAIL: str = "trillionnx@gmail.com"
+    CONTACT_PHONE: str = "+224 627 27 13 97"
     DEBUG: bool = False
     LOG_LEVEL: str = "INFO"
 

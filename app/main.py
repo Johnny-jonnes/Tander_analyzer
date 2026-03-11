@@ -1,7 +1,7 @@
 # app/main.py
 """
-Tender Analyzer MVP - Point d'entrée FastAPI.
-Application d'analyse automatisée d'appels d'offres.
+NOBILIS X — Système Expert de Veille & Analyse des Appels d'Offres.
+L'intelligence des marchés. La noblesse de l'avance.
 """
 
 import logging
@@ -42,7 +42,7 @@ settings = get_settings()
 async def lifespan(app: FastAPI):
     """Gestion du cycle de vie de l'application"""
     # --- STARTUP ---
-    logger.info("🚀 Démarrage de Tender Analyzer MVP")
+    logger.info("🚀 Démarrage de NOBILIS X")
     logger.info(f"   Version: {settings.APP_VERSION}")
     logger.info(f"   Debug: {settings.DEBUG}")
 
@@ -69,22 +69,22 @@ app = FastAPI(
     title=settings.APP_NAME,
     version=settings.APP_VERSION,
     description="""
-## 📋 Tender Analyzer MVP
+## 🏆 NOBILIS X — Système Expert de Veille & Analyse
 
-Système automatisé d'analyse d'appels d'offres publics.
+L'intelligence des marchés. La noblesse de l'avance.
+Fait en Guinée. Conçu pour que les meilleurs gagnent.
 
 ### Fonctionnalités :
-- **Scraping** automatisé des sources d'appels d'offres (DGCMP)
-- **Extraction PDF** et analyse de texte
-- **Analyse IA** via Groq (résumé, extraction structurée)
-- **Scoring** de correspondance entreprise/tender (0-100)
-- **Notifications email** quotidiennes
-- **Scheduler** automatisé (7h scraping, 8h emails)
+- **Surveillance centralisée 24h/24** des sources officielles (JAO, DGCMP, TELEMO)
+- **Analyse instantanée de documents** (50+ pages) via IA
+- **Indice de Crédibilité (0-100)** pour cibler les marchés gagnables
+- **Filtrage de précision** sur 20 secteurs spécialisés
+- **Rapport personnalisé chaque matin à 8h** directement en boîte mail
 
 ### Endpoints principaux :
 - `POST /enterprises` — Enregistrer une entreprise
 - `GET /tenders` — Lister les appels d'offres
-- `GET /analysis/{enterprise_id}` — Analyses scorées
+- `GET /analysis/{enterprise_id}` — Analyses avec Indice de Crédibilité
     """,
     docs_url="/docs",
     redoc_url="/redoc",

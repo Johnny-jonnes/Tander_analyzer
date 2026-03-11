@@ -1,6 +1,6 @@
 # app/scheduler/jobs.py
 """
-Scheduler APScheduler - Job unique automatisé.
+Scheduler APScheduler - NOBILIS X Job quotidien automatisé.
 - 7h (Conakry) : Scraping + Analyse IA + Envoi emails
 """
 
@@ -38,7 +38,7 @@ def job_daily_cycle():
     Cycle complet exécuté dans un context manager pour la session DB.
     """
     logger.info("=" * 60)
-    logger.info(f"🕐 CYCLE QUOTIDIEN DÉMARRÉ | {datetime.utcnow().isoformat()}")
+    logger.info(f"🕐 NOBILIS X — CYCLE QUOTIDIEN DÉMARRÉ | {datetime.utcnow().isoformat()}")
     logger.info("=" * 60)
 
     try:
@@ -78,7 +78,7 @@ def job_daily_cycle():
     except Exception as e:
         logger.error(f"❌ ERREUR CYCLE QUOTIDIEN: {e}", exc_info=True)
 
-    logger.info(f"🏁 CYCLE QUOTIDIEN TERMINÉ | {datetime.utcnow().isoformat()}")
+    logger.info(f"🏁 NOBILIS X — CYCLE QUOTIDIEN TERMINÉ | {datetime.utcnow().isoformat()}")
 
 
 def scheduler_event_listener(event):
@@ -101,7 +101,7 @@ def init_scheduler():
         func=job_daily_cycle,
         trigger=CronTrigger(hour=settings.SCRAPE_SCHEDULE_HOUR, minute=0),
         id="daily_cycle",
-        name="Cycle quotidien 7h — Scraping + IA + Emails",
+        name="NOBILIS X — Cycle quotidien 7h — Scraping + IA + Emails",
         replace_existing=True,
     )
 

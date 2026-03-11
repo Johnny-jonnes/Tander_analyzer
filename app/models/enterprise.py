@@ -26,11 +26,13 @@ class Enterprise(Base):
     specific_keywords = Column(Text, nullable=True, comment="Mots-clés spécifiques recherchés")
     exclude_keywords = Column(Text, nullable=True, comment="Mots-clés à exclure")
     logo_url = Column(String(500), nullable=True, comment="URL du logo de l'entreprise")
+    subscription_plan = Column(String(20), nullable=False, default="PASS", comment="Plan: PASS | ENTRY | ELITE")
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     # Relations
     email_logs = relationship("EmailLog", back_populates="enterprise", cascade="all, delete-orphan")
+    subscriptions = relationship("Subscription", back_populates="enterprise", cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"<Enterprise(id={self.id}, name='{self.name}', sector='{self.sector}')>"

@@ -11,8 +11,8 @@ class EnterpriseBase(BaseModel):
     """Champs communs"""
     name: str = Field(..., min_length=2, max_length=255, description="Nom de l'entreprise")
     sector: str = Field(..., min_length=2, max_length=255, description="Secteur d'activité")
-    min_budget: float = Field(0.0, ge=0, description="Budget minimum en USD")
-    max_budget: float = Field(0.0, ge=0, description="Budget maximum en USD")
+    min_budget: float = Field(0.0, ge=0, description="Budget minimum en GNF")
+    max_budget: float = Field(0.0, ge=0, description="Budget maximum en GNF")
     zones: str | None = Field(None, description="Zones géographiques (séparées par virgules)")
     experience_years: int = Field(0, ge=0, description="Années d'expérience")
     technical_capacity: str | None = Field(None, description="Capacités techniques")
@@ -20,6 +20,7 @@ class EnterpriseBase(BaseModel):
     specific_keywords: str | None = Field(None, description="Mots-clés spécifiques (séparés par virgules)")
     exclude_keywords: str | None = Field(None, description="Mots-clés à exclure (séparés par virgules)")
     logo_url: str | None = Field(None, description="URL du logo de l'entreprise")
+    subscription_plan: str = Field("PASS", description="Plan d'abonnement: PASS, ENTRY ou ELITE")
 
     @field_validator("max_budget")
     @classmethod
@@ -48,6 +49,7 @@ class EnterpriseUpdate(BaseModel):
     specific_keywords: str | None = None
     exclude_keywords: str | None = None
     logo_url: str | None = None
+    subscription_plan: str | None = None
 
 
 class EnterpriseResponse(EnterpriseBase):

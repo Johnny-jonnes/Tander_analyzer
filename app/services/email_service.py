@@ -98,11 +98,11 @@ class EmailService:
     def _clean_subject(self, subject: str) -> str:
         """Nettoie le sujet de l'email."""
         if not subject:
-            return "Tender Analyzer - Rapport"
+            return "NOBILIS X - Rapport"
         subject = self._fix_encoding(subject)
         subject = self._strip_emojis(subject)
         subject = re.sub(r'[\x00-\x1f\x7f-\x9f]', '', subject)
-        return subject.strip() or "Tender Analyzer - Rapport"
+        return subject.strip() or "NOBILIS X - Rapport"
 
     def _clean_plain_text(self, text: str) -> str:
         """Nettoie le texte brut."""
@@ -135,7 +135,7 @@ class EmailService:
             clean_title = self._clean_text(item['tender_title'][:80])
             clean_summary = self._clean_text(item.get('summary', '')[:200])
 
-            if source_url and source_url.startswith('http') and '/plan/' not in source_url:
+            if source_url and source_url.startswith('http'):
                 btn_url = source_url
             else:
                 import urllib.parse
@@ -201,14 +201,15 @@ class EmailService:
   <meta charset="UTF-8">
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tender Analyzer - {date_str}</title>
+  <title>NOBILIS X - {date_str}</title>
 </head>
 <body style="margin:0;padding:0;background-color:#f3f4f8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">
 <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f3f4f8;padding:32px 14px;">
 <tr><td align="center">
 <table width="620" cellpadding="0" cellspacing="0" style="max-width:620px;width:100%;">
   <tr><td style="background:linear-gradient(160deg,#0d1117 0%,#161b22 55%,#1a2035 100%);border-radius:20px 20px 0 0;padding:40px 32px 36px 32px;text-align:center;">
-    <h1 style="margin:0 0 8px 0;font-size:32px;font-weight:900;color:#ffffff;letter-spacing:-1px;font-family:-apple-system,BlinkMacSystemFont,sans-serif;">Tender Analyzer</h1>
+    <h1 style="margin:0 0 8px 0;font-size:32px;font-weight:900;color:#ffffff;letter-spacing:-1px;font-family:-apple-system,BlinkMacSystemFont,sans-serif;">NOBILIS X</h1>
+    <p style="margin:0 0 4px 0;font-size:13px;color:#c9a84c;font-weight:600;font-family:-apple-system,sans-serif;letter-spacing:1px;">L'INTELLIGENCE DES MARCHÉS</p>
     <p style="margin:0;font-size:14px;color:#8b949e;font-weight:400;font-family:-apple-system,sans-serif;">Rapport Quotidien &bull; {date_str}</p>
   </td></tr>
   <tr><td style="background:#f8f9fc;padding:28px 22px;border-radius:0 0 20px 20px;border:1px solid #eaedf2;border-top:none;">
@@ -251,7 +252,7 @@ class EmailService:
                 {
                     "From": {
                         "Email": settings.SMTP_FROM,
-                        "Name": "Tender Analyzer"
+                        "Name": "NOBILIS X"
                     },
                     "To": [
                         {
@@ -259,7 +260,7 @@ class EmailService:
                         }
                     ],
                     "Subject": self._clean_subject(subject),
-                    "TextPart": f"Bonjour,\n\nVoici votre rapport de Tender Analyzer.\n\n{plain_text}",
+                    "TextPart": f"Bonjour,\n\nVoici votre rapport NOBILIS X.\n\n{plain_text}",
                     "HTMLPart": html_body,
                     "CustomID": f"tender_{datetime.utcnow().strftime('%Y%H%M')}"
                 }
@@ -300,7 +301,7 @@ class EmailService:
     def send_daily_report(self, enterprise: Enterprise, scored_analyses: list[dict], recommendations: list[str] | None = None, pdf_path: str | None = None) -> bool:
         if not enterprise.email:
             return False
-        subject = f"Tender Analyzer - {len(scored_analyses)} appels d'offres pour {enterprise.name}"
+        subject = f"NOBILIS X - {len(scored_analyses)} opportunités pour {enterprise.name}"
         html_body = self._build_html_body(enterprise, scored_analyses, recommendations, has_pdf=bool(pdf_path))
         
         email_log = EmailLog(enterprise_id=enterprise.id, recipient_email=enterprise.email, subject=self._clean_subject(subject), status="pending")
@@ -322,14 +323,21 @@ class EmailService:
     def send_welcome_email(self, enterprise: Enterprise) -> bool:
         if not enterprise.email:
             return False
-        subject = f"Bienvenue sur Tender Analyzer - {enterprise.name}"
+        subject = f"Bienvenue sur NOBILIS X - {enterprise.name}"
         clean_name = self._clean_text(enterprise.name)
         
         html_body = f"""<!DOCTYPE html>
-<html lang="fr"><body style="font-family: sans-serif; padding: 20px;">
-    <h2>Bienvenue {clean_name}!</h2>
-    <p>Votre inscription est confirmee. Vous recevrez desormais nos rapports quotidiens.</p>
-    <p><a href="https://wa.me/224627171397">Contactez-nous sur WhatsApp</a></p>
+<html lang="fr"><body style="font-family: -apple-system, BlinkMacSystemFont, sans-serif; padding: 20px; background: #0d1117; color: #fff;">
+    <div style="max-width: 500px; margin: 0 auto; background: #161b22; padding: 40px; border-radius: 16px; border: 1px solid #30363d;">
+    <h1 style="color: #c9a84c; font-size: 28px; margin: 0 0 4px 0;">NOBILIS X</h1>
+    <p style="color: #8b949e; font-size: 12px; margin: 0 0 24px 0; letter-spacing: 1px;">L'INTELLIGENCE DES MARCHÉS</p>
+    <h2 style="color: #fff; font-size: 20px;">Bienvenue {clean_name} !</h2>
+    <p style="color: #c9d1d9; line-height: 1.6;">Votre inscription est confirmée. Vous recevrez désormais vos rapports personnalisés chaque matin à 8h00.</p>
+    <p style="color: #c9d1d9; line-height: 1.6;">NOBILIS X analyse en continu les sources officielles (JAO, DGCMP, TELEMO) et calcule votre <strong style="color: #c9a84c;">Indice de Crédibilité</strong> pour chaque opportunité.</p>
+    <hr style="border: 1px solid #30363d; margin: 24px 0;">
+    <p style="color: #8b949e; font-size: 13px;">📧 trillionnx@gmail.com | 📞 +224 627 27 13 97</p>
+    <p style="color: #8b949e; font-size: 12px;">Fait en Guinée. Conçu pour que les meilleurs gagnent.</p>
+    </div>
 </body></html>"""
 
         email_log = EmailLog(enterprise_id=enterprise.id, recipient_email=enterprise.email, subject=self._clean_subject(subject), status="pending")
