@@ -376,11 +376,19 @@
         
         /* Dropdown list */
         .choices__list--dropdown {
-            background: var(--bg-card); border: 1px solid var(--border);
-            border-radius: 12px; color: var(--text-primary);
+            background-color: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: #000000;
+        }
+        .choices__list--dropdown .choices__item--choice {
+            background-color: #ffffff;
+            color: #000000; /* Texte noir dès le départ */
+            font-weight: 500;
         }
         .choices__list--dropdown .choices__item--selectable.is-highlighted {
-            background: rgba(201,168,76,0.1); color: var(--gold);
+            background-color: rgba(201,168,76,0.1); 
+            color: var(--gold-dark);
         }
         
         /* Selected items (tags) */
