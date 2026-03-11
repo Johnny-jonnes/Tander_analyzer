@@ -236,10 +236,11 @@ def run_test_cycle_for_enterprise(enterprise_id: int, db: Session = Depends(get_
         if analysis:
             item["summary"] = analysis.summary or ""
 
-    # Recommandations IA
+    # Recommandations IA (adaptees au plan)
+    plan = enterprise.subscription_plan or "PASS"
     recos = None
     try:
-        recos = analyzer.generate_budget_recommendations(enterprise, scored[:5])
+        recos = analyzer.generate_budget_recommendations(enterprise, scored[:5], subscription_plan=plan)
     except Exception as e:
         logger.error(f"Erreur recommandations test: {e}")
 
@@ -247,7 +248,7 @@ def run_test_cycle_for_enterprise(enterprise_id: int, db: Session = Depends(get_
     pdf_path = None
     try:
         report_service = ReportGeneratorService(db)
-        pdf_path = report_service.generate_pdf_report(enterprise_id, recos)
+        pdf_path = report_service.generate_pdf_report(enterprise_id, recos, subscription_plan=plan)
     except Exception as e:
         logger.error(f"Erreur PDF test: {e}")
 
