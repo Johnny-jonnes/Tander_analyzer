@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NOBILIS X — Le Briefing de l'Elite</title>
+<style>
+:root {
+  --gold:#C9A84C;--gold-lt:#F0D07A;--gold-dk:#7A5F28;
+  --black:#080808;--dark:#0F0F0F;--d2:#161616;--d3:#1E1E1E;
+  --red:#D63C3C;--red-dk:#7A1F1F;--green:#2ECC71;
+  --txt:#E8E0D0;--muted:#888070;
+  --fh:Georgia,'Times New Roman',serif;
+  --fb:'Segoe UI',Arial,sans-serif;
+  --fm:'Courier New',Courier,monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--black);color:var(--txt);font-family:var(--fb);}
+
+/* PROGRESS */
+#prog{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--gold-dk),var(--gold));z-index:600;transition:width .4s;}
+
+/* TOP BAR */
+#top{position:fixed;top:10px;left:0;right:0;display:flex;justify-content:space-between;padding:0 30px;z-index:500;pointer-events:none;}
+.logo{font-family:var(--fh);font-size:.95rem;color:var(--gold);letter-spacing:3px;}
+.logo em{color:var(--gold-dk);font-size:.65rem;font-style:normal;}
+.sec-lbl{font-family:var(--fm);font-size:.55rem;letter-spacing:3px;color:var(--gold-dk);text-transform:uppercase;align-self:center;}
+
+/* DECK — leaves space top+bottom */
+#deck{position:fixed;top:44px;left:0;right:0;bottom:68px;overflow:hidden;}
+
+/* SLIDES */
+.slide{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:16px 48px 16px;
+  opacity:0;transform:translateY(20px);
+  transition:opacity .4s,transform .4s;
+  pointer-events:none;
+  overflow-y:auto;
+  gap:0;
+}
+.slide.on{opacity:1;transform:translateY(0);pointer-events:all;}
+
+/* NAV */
+#nav{
+  position:fixed;bottom:0;left:0;right:0;height:68px;
+  display:flex;align-items:center;justify-content:center;gap:16px;
+  background:rgba(8,8,8,.98);border-top:1px solid rgba(201,168,76,.15);
+  z-index:600;
+}
+#nav button{
+  font-family:var(--fb);font-size:.78rem;letter-spacing:.5px;
+  background:none;border:1px solid var(--gold-dk);color:var(--gold);
+  padding:6px 18px;border-radius:20px;cursor:pointer;transition:all .2s;
+  white-space:nowrap;
+}
+#nav button:hover{background:var(--gold);color:var(--black);}
+#nav button:disabled{opacity:.2;cursor:default;}
+#nav button:disabled:hover{background:none;color:var(--gold);}
+#ctr{font-family:var(--fm);font-size:.7rem;color:var(--gold-dk);min-width:44px;text-align:center;}
+.dots{display:flex;gap:6px;align-items:center;}
+.dot{width:5px;height:5px;border-radius:50%;background:var(--gold-dk);cursor:pointer;transition:all .2s;}
+.dot.on{background:var(--gold);transform:scale(1.6);}
+
+/* SHARED */
+.badge{display:inline-block;font-family:var(--fm);font-size:.55rem;letter-spacing:3px;text-transform:uppercase;color:var(--gold);border:1px solid var(--gold-dk);padding:4px 12px;margin-bottom:16px;}
+.deco{width:44px;height:2px;background:linear-gradient(90deg,var(--gold),transparent);margin:12px auto;}
+.tr{display:inline-block;font-size:.58rem;padding:2px 7px;border-radius:9px;background:rgba(214,60,60,.14);color:var(--red);}
+.tm{display:inline-block;font-size:.58rem;padding:2px 7px;border-radius:9px;background:rgba(136,128,112,.12);color:var(--muted);}
+.tg{display:inline-block;font-size:.58rem;padding:2px 7px;border-radius:9px;background:rgba(201,168,76,.12);color:var(--gold);}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+@keyframes glow{0%,100%{box-shadow:0 0 0 0 rgba(201,168,76,0)}50%{box-shadow:0 0 16px 3px rgba(201,168,76,.25)}}
+
+/* ─── S1 ─── */
+#s1{text-align:center;}
+.s1-glow{position:absolute;width:480px;height:480px;border-radius:50%;background:radial-gradient(circle,rgba(201,168,76,.07) 0%,transparent 70%);top:50%;left:50%;transform:translate(-50%,-55%);pointer-events:none;}
+.warn{font-family:var(--fm);font-size:.6rem;letter-spacing:3px;color:var(--red);border:1px solid var(--red-dk);padding:4px 14px;margin-bottom:22px;animation:blink 2s infinite;display:inline-block;}
+#s1 h1{font-family:var(--fh);font-size:clamp(1.7rem,3.3vw,2.9rem);line-height:1.25;max-width:820px;margin-bottom:12px;}
+.r{color:var(--red);}.g{color:var(--gold);}
+#s1 .sub{font-size:.9rem;color:var(--muted);max-width:560px;line-height:1.65;margin-bottom:24px;}
+#s1 blockquote{font-family:var(--fh);font-style:italic;font-size:.95rem;color:var(--gold-lt);max-width:600px;border-left:2px solid var(--gold-dk);padding-left:16px;text-align:left;line-height:1.6;}
+
+/* ─── S2 ─── */
+#s2{text-align:center;}
+#s2 h2{font-family:var(--fh);font-size:clamp(1.5rem,2.8vw,2.4rem);margin-bottom:30px;}
+#s2 h2 span{color:var(--red);}
+.pie-wrap{display:flex;gap:40px;align-items:center;justify-content:center;flex-wrap:wrap;}
+.pie-leg{text-align:left;max-width:380px;display:flex;flex-direction:column;gap:16px;}
+.li{display:flex;gap:11px;align-items:flex-start;}
+.li-dot{width:12px;height:12px;border-radius:50%;margin-top:3px;flex-shrink:0;}
+.li-txt strong{display:block;font-size:.95rem;margin-bottom:2px;}
+.li-txt p{color:var(--muted);font-size:.82rem;line-height:1.5;}
+.pie-q{font-family:var(--fh);font-style:italic;color:var(--muted);font-size:.84rem;border-top:1px solid rgba(255,255,255,.05);padding-top:12px;margin-top:4px;line-height:1.55;}
+
+/* ─── S3 ─── */
+#s3{text-align:center;}
+#s3 h2{font-family:var(--fh);font-size:clamp(1.4rem,2.6vw,2.1rem);margin-bottom:6px;}
+#s3 .sub2{color:var(--muted);font-size:.84rem;margin-bottom:20px;}
+.cgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;max-width:780px;width:100%;margin-bottom:16px;}
+.cc{background:var(--d2);border:1px solid rgba(201,168,76,.1);border-top:3px solid var(--red);padding:18px 16px;border-radius:4px;}
+.cc .ico{font-size:1.6rem;margin-bottom:8px;}
+.cc h4{font-size:.7rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:5px;}
+.cc .amt{font-family:var(--fh);font-size:1.3rem;color:var(--red);margin-bottom:5px;}
+.cc p{font-size:.78rem;color:var(--muted);line-height:1.45;}
+.ctotal{background:rgba(201,168,76,.06);border:1px solid var(--gold-dk);padding:11px 24px;font-size:.9rem;color:var(--gold-lt);}
+
+/* ─── S4 ─── */
+#s4{text-align:center;}
+#s4 h2{font-family:var(--fh);font-size:clamp(1.4rem,2.6vw,2.1rem);margin-bottom:6px;}
+#s4 .sub2{color:var(--muted);font-size:.84rem;margin-bottom:20px;}
+.bgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:720px;width:100%;margin-bottom:16px;}
+.bc{background:var(--d2);border:1px solid rgba(255,255,255,.05);padding:18px 16px;border-radius:4px;text-align:left;}
+.bc h4{color:var(--red);font-size:.7rem;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:7px;}
+.bc .pct{font-family:var(--fh);font-size:2rem;color:var(--red);margin-bottom:4px;opacity:.55;}
+.bc p{color:var(--muted);font-size:.82rem;line-height:1.5;}
+.bc.full{grid-column:span 2;}
+.bc.full .qt{font-family:var(--fh);font-style:italic;font-size:1rem;color:var(--txt);margin-bottom:7px;}
+.conc{font-family:var(--fh);font-style:italic;font-size:.9rem;color:var(--muted);max-width:540px;}
+
+/* ─── S5 ─── */
+#s5{text-align:center;}
+#s5 h2{font-family:var(--fh);font-size:clamp(1.4rem,2.6vw,2.1rem);margin-bottom:22px;}
+#s5 h2 span{color:var(--gold);}
+.iw{display:flex;gap:18px;max-width:800px;width:100%;flex-wrap:wrap;justify-content:center;margin-bottom:16px;}
+.ic{flex:1;min-width:260px;border-radius:5px;padding:20px 18px;text-align:left;position:relative;overflow:hidden;}
+.ic.dan{border:1px solid var(--red-dk);}
+.ic.saf{border:1px solid rgba(46,204,113,.3);}
+.ic.dan::before,.ic.saf::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.ic.dan::before{background:var(--red);}.ic.saf::before{background:var(--green);}
+.ic-sc{font-family:var(--fm);font-size:3rem;font-weight:700;margin-bottom:3px;}
+.dan .ic-sc{color:var(--red);}.saf .ic-sc{color:var(--green);}
+.ic h4{font-size:.62rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;}
+.ic ul{list-style:none;margin-bottom:13px;}
+.ic ul li{font-size:.8rem;color:var(--muted);padding-left:12px;position:relative;margin-bottom:6px;line-height:1.4;}
+.ic ul li::before{content:'>';position:absolute;left:0;}
+.ic-v{padding:9px 12px;border-radius:3px;font-weight:600;font-size:.83rem;}
+.dan .ic-v{background:rgba(214,60,60,.1);color:var(--red);}
+.saf .ic-v{background:rgba(46,204,113,.1);color:var(--green);}
+#s5 .note{color:var(--muted);font-size:.84rem;max-width:520px;font-style:italic;}
+#s5 .note strong{color:var(--txt);}
+
+/* ─── S6 ─── */
+#s6{text-align:center;justify-content:flex-start;padding-top:8px;}
+#s6 h2{font-family:var(--fh);font-size:clamp(1.3rem,2.3vw,1.9rem);margin-bottom:4px;}
+#s6 .sub2{color:var(--muted);font-size:.78rem;margin-bottom:10px;}
+.pvw{max-width:940px;width:100%;display:flex;flex-direction:column;gap:10px;}
+.pvh{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;background:var(--d2);border:1px solid rgba(201,168,76,.2);border-radius:5px;padding:12px 16px;position:relative;margin-top:10px;}
+.pvh::before{content:'PV OFFICIEL — MITP / VOIE EXPRESS KAGBELEN-KOURIA 26,7KM — BUDGET NATIONAL 2023';position:absolute;top:-9px;left:14px;background:var(--gold);color:var(--black);font-family:var(--fm);font-size:.5rem;padding:2px 9px;letter-spacing:1.5px;}
+.phs{text-align:center;}
+.phn{font-family:var(--fh);font-size:1.7rem;margin-bottom:1px;}
+.phn.r{color:var(--red);}.phn.g{color:var(--gold);}.phn.gr{color:var(--green);}.phn.w{color:var(--txt);}
+.phs p{font-size:.63rem;color:var(--muted);line-height:1.25;}
+.pvb{display:grid;grid-template-columns:1.65fr 1fr;gap:10px;}
+.lt{background:var(--d2);border:1px solid rgba(214,60,60,.18);border-radius:5px;overflow:hidden;}
+.lth{display:grid;grid-template-columns:1.8fr 1.5fr 2fr;background:rgba(214,60,60,.07);padding:6px 12px;border-bottom:1px solid rgba(214,60,60,.1);}
+.lth span{font-family:var(--fm);font-size:.52rem;letter-spacing:2px;text-transform:uppercase;color:var(--red);}
+.ltr{display:grid;grid-template-columns:1.8fr 1.5fr 2fr;padding:5px 12px;border-bottom:1px solid rgba(255,255,255,.025);align-items:center;}
+.ltr:last-child{border-bottom:none;}
+.lco{font-size:.74rem;font-weight:600;color:var(--txt);}
+.lmo{font-family:var(--fm);font-size:.63rem;color:var(--red);}
+.lwh{font-size:.64rem;color:var(--muted);line-height:1.3;}
+.pvr{display:flex;flex-direction:column;gap:10px;}
+.winp{background:rgba(46,204,113,.04);border:1px solid rgba(46,204,113,.18);border-radius:5px;padding:12px 14px;}
+.winp h4{font-size:.58rem;letter-spacing:2px;text-transform:uppercase;color:var(--green);margin-bottom:9px;}
+.wpr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:7px;padding-bottom:7px;border-bottom:1px solid rgba(255,255,255,.04);}
+.wpr:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0;}
+.wn{font-size:.77rem;font-weight:600;color:var(--txt);}
+.wl{font-size:.64rem;color:var(--muted);}
+.wa{font-family:var(--fm);font-size:.63rem;color:var(--green);white-space:nowrap;margin-left:5px;}
+.verd{background:rgba(201,168,76,.05);border:1px solid var(--gold-dk);border-radius:5px;padding:12px 14px;display:flex;flex-direction:column;gap:8px;}
+.verd h4{font-size:.58rem;letter-spacing:2px;text-transform:uppercase;color:var(--gold);}
+.verd p{font-family:var(--fh);font-style:italic;font-size:.8rem;color:var(--txt);line-height:1.5;}
+.vs{display:inline-flex;align-items:center;gap:5px;font-family:var(--fm);font-size:.68rem;color:var(--red);background:rgba(214,60,60,.1);padding:4px 9px;border-radius:3px;}
+
+/* ─── S7 ─── */
+#s7{text-align:center;}
+#s7 h2{font-family:var(--fh);font-size:clamp(1.4rem,2.6vw,2.1rem);margin-bottom:38px;}
+.eng{display:flex;max-width:820px;width:100%;position:relative;}
+.eng::before{content:'';position:absolute;top:38px;left:12%;right:12%;height:1px;background:linear-gradient(90deg,transparent,var(--gold-dk),transparent);}
+.es{flex:1;text-align:center;padding:0 16px;}
+.es-num{width:48px;height:48px;border-radius:50%;border:1px solid var(--gold-dk);display:flex;align-items:center;justify-content:center;margin:0 auto 18px;font-family:var(--fm);font-size:1rem;color:var(--gold);background:var(--black);position:relative;z-index:2;}
+.es-t{font-family:var(--fm);font-size:1.6rem;color:var(--txt);margin-bottom:7px;}
+.es h4{font-size:.7rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);margin-bottom:8px;}
+.es p{color:var(--muted);font-size:.8rem;line-height:1.5;}
+#s7 .note{margin-top:36px;color:var(--muted);font-style:italic;font-size:.84rem;max-width:500px;}
+
+/* ─── S8 ─── */
+#s8{text-align:center;}
+#s8 h2{font-family:var(--fh);font-size:clamp(1.4rem,2.6vw,2.1rem);margin-bottom:22px;}
+#s8 h2 span{color:var(--gold);}
+.inbox{background:var(--d3);border:1px solid rgba(201,168,76,.18);border-radius:7px;max-width:660px;width:100%;overflow:hidden;box-shadow:0 24px 48px rgba(0,0,0,.5);}
+.ihd{background:var(--d2);padding:10px 16px;display:flex;align-items:center;gap:8px;border-bottom:1px solid rgba(255,255,255,.05);}
+.idot{width:8px;height:8px;border-radius:50%;}
+.ihd span{font-family:var(--fm);font-size:.68rem;color:var(--muted);margin-left:auto;}
+.ifr{padding:12px 18px 9px;display:flex;align-items:center;gap:11px;border-bottom:1px solid rgba(255,255,255,.04);}
+.iav{width:33px;height:33px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-family:var(--fh);font-size:.8rem;color:var(--black);font-weight:700;flex-shrink:0;}
+.imt strong{display:block;font-size:.82rem;}
+.imt span{font-size:.68rem;color:var(--muted);}
+.ib{padding:14px 18px;}
+.isj{font-family:var(--fh);font-size:.95rem;color:var(--gold-lt);margin-bottom:12px;}
+.il{display:flex;gap:9px;padding:7px 11px;border-radius:3px;margin-bottom:6px;align-items:flex-start;background:var(--d2);font-size:.79rem;line-height:1.45;}
+.il p{color:var(--muted);}
+.il p strong{color:var(--txt);}
+.ibg{font-size:.59rem;padding:2px 7px;border-radius:9px;white-space:nowrap;margin-top:3px;font-weight:600;}
+.ibg.gr{background:rgba(46,204,113,.14);color:var(--green);}
+.ibg.rd{background:rgba(214,60,60,.14);color:var(--red);}
+.ibg.gd{background:rgba(201,168,76,.14);color:var(--gold);}
+.asym{margin-top:16px;font-family:var(--fh);font-style:italic;font-size:.9rem;color:var(--gold-lt);}
+
+/* ─── S9 ─── */
+#s9{text-align:center;}
+#s9 h2{font-family:var(--fh);font-size:clamp(1.4rem,2.6vw,2.1rem);margin-bottom:30px;}
+.bal{display:flex;gap:22px;align-items:stretch;max-width:760px;width:100%;flex-wrap:wrap;justify-content:center;margin-bottom:16px;}
+.bs{flex:1;min-width:220px;padding:20px 18px;border-radius:4px;text-align:left;}
+.bs.hv{background:rgba(214,60,60,.05);border:1px solid rgba(214,60,60,.2);transform:translateY(16px);}
+.bs.lt{background:rgba(201,168,76,.04);border:1px solid rgba(201,168,76,.2);}
+.bs h4{font-size:.65rem;letter-spacing:2px;text-transform:uppercase;margin-bottom:14px;}
+.bs.hv h4{color:var(--red);}.bs.lt h4{color:var(--gold);}
+.bi{margin-bottom:12px;}
+.bi .val{font-family:var(--fh);font-size:1.4rem;margin-bottom:2px;}
+.bs.hv .val{color:var(--red);}.bs.lt .val{color:var(--gold);}
+.bi p{font-size:.76rem;color:var(--muted);line-height:1.35;}
+.bvs{display:flex;align-items:center;font-family:var(--fh);font-size:1.2rem;color:var(--muted);align-self:center;}
+.roi{background:rgba(201,168,76,.06);border:1px solid var(--gold-dk);padding:10px 24px;font-size:.88rem;color:var(--gold-lt);}
+
+/* ─── S10 ─── */
+#s10{text-align:center;}
+#s10 h2{font-family:var(--fh);font-size:clamp(1.3rem,2.4vw,2rem);margin-bottom:6px;}
+#s10 .sub2{color:var(--muted);font-size:.82rem;margin-bottom:18px;}
+.plans{display:flex;gap:16px;max-width:800px;width:100%;flex-wrap:wrap;justify-content:center;}
+.plan{flex:1;min-width:190px;border-radius:5px;padding:20px 16px;text-align:left;position:relative;overflow:hidden;}
+.plan.en{background:var(--d2);border:1px solid rgba(255,255,255,.07);}
+.plan.el{background:var(--d2);border:2px solid var(--gold-dk);}
+.plan.el::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gold-dk),var(--gold-lt),var(--gold-dk));}
+.plan.ps{background:var(--d2);border:1px solid rgba(255,255,255,.07);flex:0 0 auto;min-width:150px;text-align:center;}
+.pnm{font-family:var(--fh);font-size:1.1rem;margin-bottom:4px;}
+.el .pnm{color:var(--gold-lt);}
+.ppr{font-family:var(--fm);font-size:1.1rem;margin-bottom:13px;}
+.ppr span{font-size:.68rem;color:var(--muted);}
+.pf{display:flex;gap:6px;font-size:.77rem;color:var(--muted);margin-bottom:6px;}
+.pf::before{content:'v';color:var(--gold);flex-shrink:0;font-family:var(--fb);}
+.el .pf{color:var(--txt);}
+.pb{margin-top:15px;padding:9px;text-align:center;border-radius:2px;font-size:.77rem;cursor:pointer;border:none;width:100%;font-family:var(--fb);}
+.en .pb,.ps .pb{background:var(--d3);color:var(--muted);border:1px solid rgba(255,255,255,.07);}
+.el .pb{background:var(--gold);color:var(--black);font-weight:700;animation:glow 2s infinite;}
+
+/* ─── S11 ─── */
+#s11{text-align:center;}
+.s11-glow{position:absolute;width:540px;height:540px;border-radius:50%;background:radial-gradient(circle,rgba(201,168,76,.06) 0%,transparent 70%);top:50%;left:50%;transform:translate(-50%,-55%);pointer-events:none;}
+.crown{font-size:2.4rem;margin-bottom:10px;}
+#s11 h2{font-family:var(--fh);font-size:clamp(1.7rem,3.2vw,2.8rem);margin-bottom:7px;}
+#s11 h2 span{color:var(--gold);}
+.scar{font-family:var(--fm);font-size:.63rem;letter-spacing:3px;color:var(--red);border:1px solid var(--red-dk);padding:4px 14px;margin-bottom:22px;animation:blink 1.5s infinite;display:inline-block;}
+#s11 .desc{color:var(--muted);max-width:490px;font-size:.87rem;line-height:1.65;margin-bottom:20px;}
+.ctaw{display:flex;gap:28px;align-items:center;justify-content:center;flex-wrap:wrap;max-width:660px;}
+.qrb{background:#fff;padding:12px;border-radius:3px;}
+.qrb svg{display:block;}
+.qrl{font-family:var(--fm);font-size:.57rem;color:var(--muted);margin-top:5px;text-align:center;letter-spacing:1px;}
+.ctar{text-align:left;display:flex;flex-direction:column;gap:10px;}
+.bonus{background:rgba(201,168,76,.05);border:1px solid var(--gold-dk);padding:12px 14px;border-radius:3px;}
+.bonus h4{color:var(--gold);font-size:.6rem;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;}
+.bonus p{font-size:.82rem;color:var(--muted);line-height:1.5;}
+.conts{display:flex;flex-direction:column;gap:6px;}
+.conts span{color:var(--gold-lt);font-size:.85rem;}
+.tmr{margin-top:18px;display:flex;flex-direction:column;align-items:center;gap:7px;}
+.tl{font-family:var(--fm);font-size:.57rem;letter-spacing:3px;color:var(--muted);text-transform:uppercase;}
+#td{font-family:var(--fm);font-size:2.4rem;color:var(--red);letter-spacing:4px;animation:blink 1s infinite;}
+.tbw{width:160px;height:3px;background:rgba(255,255,255,.07);border-radius:2px;}
+#tb{height:100%;background:var(--red);border-radius:2px;transition:width 1s linear;}
+</style>
+</head>
+<body>
+
+<div id="prog"></div>
+<div id="top">
+  <div class="logo">NOBILIS <em>X</em></div>
+  <div class="sec-lbl" id="sl">LE CHOC ET LA THESE</div>
+</div>
+
+<div id="deck">
+
+<!-- S1 -->
+<div class="slide on" id="s1">
+  <div class="s1-glow"></div>
+  <div class="warn"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:6px"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>ACCES RESERVE &#8212; MEMBRES INVITES SEULEMENT</div>
+  <h1>Naviguer en eaux troubles :<br>Comment <span class="r">1%</span> des entreprises gagnent<br><span class="g">80%</span> des vrais marches publics</h1>
+  <div class="deco"></div>
+  <p class="sub">La fin des AON tronques, des dossiers inutiles et des lignes de credit epuisees pour rien.</p>
+  <blockquote>"Bienvenue. Vous etes ici parce que vous en avez assez de bloquer des garanties bancaires sur des marches perdus d'avance."</blockquote>
+</div>
+
+<!-- S2 -->
+<div class="slide" id="s2">
+  <div class="badge">La Verite que l'Etat ne Vous Dira Pas</div>
+  <h2>Vous jouez a la Roulette Russe <span>avec votre BFR</span></h2>
+  <div class="pie-wrap">
+    <svg width="180" height="180" viewBox="0 0 42 42">
+      <circle cx="21" cy="21" r="15.9" fill="#0F0F0F" stroke="#1a1a1a" stroke-width="10"/>
+      <circle cx="21" cy="21" r="15.9" fill="transparent" stroke="#D63C3C" stroke-width="10" stroke-dasharray="70 30" stroke-dashoffset="0" transform="rotate(-90 21 21)"/>
+      <circle cx="21" cy="21" r="15.9" fill="transparent" stroke="#C9A84C" stroke-width="10" stroke-dasharray="30 70" stroke-dashoffset="-70" transform="rotate(-90 21 21)"/>
+      <text x="21" y="20" text-anchor="middle" font-size="3" fill="#888070" font-family="Georgia,serif">Marches</text>
+      <text x="21" y="24" text-anchor="middle" font-size="3" fill="#888070" font-family="Georgia,serif">Guinee</text>
+    </svg>
+    <div class="pie-leg">
+      <div class="li"><div class="li-dot" style="background:var(--red)"></div><div class="li-txt"><strong style="color:var(--red)">70% &#8212; Marches Opaques</strong><p>Pre-attribues, gre a gre masque, delais AON suspects &lt;10 jours. Votre dossier ne sert qu'a remplir un quota legal.</p></div></div>
+      <div class="li"><div class="li-dot" style="background:var(--gold)"></div><div class="li-txt"><strong style="color:var(--gold)">30% &#8212; Opportunites Reelles</strong><p>Financements BND stricts, bailleurs internationaux audites. Ce sont vos seules cibles valables.</p></div></div>
+      <p class="pie-q">"Le probleme des PME guineennes n'est pas le manque de competence. Vous etes le figurant d'une piece dont la fin est deja ecrite."</p>
+    </div>
+  </div>
+</div>
+
+<!-- S3 -->
+<div class="slide" id="s3">
+  <div class="badge">Le Prix de l'Aveuglement</div>
+  <h2>Le Vrai Cout d'un "Dossier Pour Rien"</h2>
+  <p class="sub2">L'hemorragie financiere invisible de votre entreprise</p>
+  <div class="cgrid">
+    <div class="cc"><div class="ico"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#D63C3C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><h4>Temps Ingenieurs</h4><div class="amt">50&#8211;150H</div><p>De travail qualifie mobilise sur un dossier condamne d'avance.</p></div>
+    <div class="cc"><div class="ico"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#D63C3C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div><h4>Tresorerie Gelee</h4><div class="amt">Garantie Bloquee</div><p>96% des PME n'ont pas acces au credit. Chaque caution immobilisee est un projet mort-ne.</p></div>
+    <div class="cc"><div class="ico"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#D63C3C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div><h4>Cout Mental</h4><div class="amt">Demotivation</div><p>Erosion silencieuse du moral de vos equipes apres chaque echec evitable.</p></div>
+  </div>
+  <div class="ctotal"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2.5" stroke-linecap="round" style="vertical-align:middle;margin-right:5px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Un dossier prepare pour rien = <strong style="color:var(--red)">8,5% de marge nette</strong> perdue ou gelee pendant des semaines.</div>
+</div>
+
+<!-- S4 -->
+<div class="slide" id="s4">
+  <div class="badge">La Fausse Solution</div>
+  <h2>Chercher, c'est deja avoir Perdu</h2>
+  <p class="sub2">Le Modele Actuel est Casse : Le "Bruit" Toxique</p>
+  <div class="bgrid">
+    <div class="bc"><h4><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2.5" stroke-linecap="round" style="vertical-align:middle;margin-right:5px"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>Surveiller les journaux</h4><div class="pct">90%</div><p>d'annonces inutiles, irrecevables ou dangereuses pour votre entreprise.</p></div>
+    <div class="bc"><h4><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2.5" stroke-linecap="round" style="vertical-align:middle;margin-right:5px"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>Site ARMP / TELEMO</h4><div class="pct">Retard</div><p>Information arrivant trop tard, sans contexte, sans analyse. Illusion de veille.</p></div>
+    <div class="bc full"><p class="qt">"Acheter Horoya n'est pas une strategie. C'est du secretariat."</p><p style="font-size:.82rem;color:var(--muted);">Seulement <strong style="color:var(--gold)">10% des appels</strong> publies sont reellement utiles pour votre secteur.</p></div>
+  </div>
+  <p class="conc">"Le probleme n'est pas l'acces a l'information. C'est l'absence de filtre intelligent entre vous et le bruit."</p>
+</div>
+
+<!-- S5 -->
+<div class="slide" id="s5">
+  <div class="badge">La Revelation &#8212; NOBILIS X</div>
+  <h2>Le Bouclier &amp; Le Filtre &#8212; <span>L'Indice de Credibilite</span></h2>
+  <div class="iw">
+    <div class="ic dan">
+      <div class="ic-sc">32<span style="font-size:1.3rem">/100</span></div>
+      <h4><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" style="vertical-align:middle;margin-right:5px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Marche a Risque Eleve</h4>
+      <ul><li>Delais AON inferieurs a 10 jours</li><li>Source de financement floue</li><li>Historique de passation opaque</li></ul>
+      <div class="ic-v"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:middle;margin-right:5px"><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Abandonnez avant d'y perdre 1 franc.</div>
+    </div>
+    <div class="ic saf">
+      <div class="ic-sc">94<span style="font-size:1.3rem">/100</span></div>
+      <h4><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" style="vertical-align:middle;margin-right:5px"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>Opportunite Confirmee</h4>
+      <ul><li>Bailleur international audite</li><li>Criteres d'eligibilite ouverts</li><li>Respect strict du code des marches</li></ul>
+      <div class="ic-v"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:middle;margin-right:5px"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>Engagez vos equipes avec 24h d'avance.</div>
+    </div>
+  </div>
+  <p class="note">NOBILIS X ne se contente pas de vous indiquer ou aller. Il vous dit surtout <strong>ou ne PAS y aller.</strong></p>
+</div>
+
+<!-- S6 CAS REEL -->
+<div class="slide" id="s6">
+  <div class="badge">La Preuve en Chiffres Reels</div>
+  <h2>Voici ce qui s'est passe. Nommement.</h2>
+  <p class="sub2">PV d'Attribution Provisoire officiel &#8212; Voie Express Kagbelen&#8211;Kouria &#8212; MITP 2023</p>
+  <div class="pvw">
+    <div class="pvh">
+      <div class="phs"><div class="phn r">9</div><p>Entreprises<br>eliminees</p></div>
+      <div class="phs"><div class="phn g">&#8776;85 Mds</div><p>GNF de travaux<br>en jeu</p></div>
+      <div class="phs"><div class="phn r">0</div><p>Caution<br>recuperee</p></div>
+      <div class="phs"><div class="phn gr">3</div><p>Attributaires<br>sur 3 lots</p></div>
+    </div>
+    <div class="pvb">
+      <div class="lt">
+        <div class="lth"><span>Entreprise</span><span>Montant soumis (GNF)</span><span>Motif</span></div>
+        <div class="ltr"><div class="lco">GUICOPRES</div><div class="lmo">1 405 795 028 198</div><div class="lwh"><span class="tm">3e moins disante &#8212; Lot 1</span><br>Non evaluee au post-qualification</div></div>
+        <div class="ltr"><div class="lco">GUICOPRES</div><div class="lmo">811 117 810 548</div><div class="lwh"><span class="tr">Caution manquante + Ligne credit</span><br>Lot 2 &#8212; Dossier incomplet</div></div>
+        <div class="ltr"><div class="lco">FRENAN CHINE</div><div class="lmo">1 282 714 148 981</div><div class="lwh"><span class="tm">2e moins disante &#8212; Lot 2</span><br>Non evaluee au post-qualification</div></div>
+        <div class="ltr"><div class="lco">BEGEC-TRAVAUX</div><div class="lmo">1 184 714 148 680</div><div class="lwh"><span class="tr">Caution manquante + Ligne credit</span><br>Lot 2 &#8212; Dossier incomplet</div></div>
+        <div class="ltr"><div class="lco">GUITER SA</div><div class="lmo">950 325 251 654</div><div class="lwh"><span class="tm">2e moins disante &#8212; Lot 2</span><br>Non evaluee au post-qualification</div></div>
+        <div class="ltr"><div class="lco">SOGECO-SARL</div><div class="lmo">1 177 705 201 767</div><div class="lwh"><span class="tm">3e moins disante &#8212; Lot 2</span><br>Non evaluee au post-qualification</div></div>
+        <div class="ltr"><div class="lco">IC TRANSPORT SARLU</div><div class="lmo">584 114 144 183</div><div class="lwh"><span class="tm">4e moins disante &#8212; Lot 2</span><br>Non evaluee au post-qualification</div></div>
+        <div class="ltr"><div class="lco">HENAN CHINE</div><div class="lmo">1 781 216 343 681</div><div class="lwh"><span class="tm">5e moins disante &#8212; Lot 2</span><br>Non evaluee au post-qualification</div></div>
+        <div class="ltr"><div class="lco">GUICOPRES (Lot 3)</div><div class="lmo">085 496 866 619</div><div class="lwh"><span class="tr">Caution manquante + Ligne credit</span><br>Lot 3 &#8212; Dossier incomplet</div></div>
+      </div>
+      <div class="pvr">
+        <div class="winp">
+          <h4><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round" style="vertical-align:middle;margin-right:5px"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>Les 3 Attributaires Reels</h4>
+          <div class="wpr"><div><div class="wn">BEGEC-TRAVAUX</div><div class="wl">Lot 1 &#8212; PK0 au PK6 (6km)</div></div><div class="wa">744 173 416 798 GNF</div></div>
+          <div class="wpr"><div><div class="wn">FRENAN CHINE</div><div class="wl">Lot 2 &#8212; PK6 au PK16 (6km)</div></div><div class="wa">1 077 576 431 594 GNF</div></div>
+          <div class="wpr"><div><div class="wn">GUITER SA</div><div class="wl">Lot 3 &#8212; PK16 au PK26 (10,7km)</div></div><div class="wa">741 295 516 911 GNF</div></div>
+        </div>
+        <div class="verd">
+          <h4><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2" stroke-linecap="round" style="vertical-align:middle;margin-right:5px"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Ce que NOBILIS X aurait detecte</h4>
+          <p>"9 entreprises. Des semaines de travail. Des garanties bloquees. Certaines sans meme avoir leur caution en ordre. Pour rien."</p>
+          <div class="vs"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:middle;margin-right:4px"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Score 31/100 &#8212; Budget National + post-qualification restrictive &#8594; Ne pas soumettre.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- S7 -->
+<div class="slide" id="s7">
+  <div class="badge">Le Moteur NOBILIS X</div>
+  <h2>Comment fonctionne le Systeme Expert</h2>
+  <div class="eng">
+    <div class="es"><div class="es-num">01</div><div class="es-t">08:00</div><h4>L'Aspiration</h4><p>Scraping temps reel TELEMO, ARMP et Ministeres avant votre cafe du matin. Zero delai.</p></div>
+    <div class="es"><div class="es-num">02</div><div class="es-t" style="color:var(--gold)">IA</div><h4>Analyse Semantique</h4><p>Notre moteur supprime 90% des annonces inutiles. Seul l'essentiel vous parvient.</p></div>
+    <div class="es"><div class="es-num">03</div><div class="es-t" style="color:var(--green)">0-100</div><h4>Le Radar d'Urgence</h4><p>L'Indice de Credibilite. Une decision strategique instantanee, pas juste une alerte email.</p></div>
+  </div>
+  <p class="note">"Trois piliers. Un seul objectif : vous donner l'asymetrie de l'information."</p>
+</div>
+
+<!-- S8 -->
+<div class="slide" id="s8">
+  <div class="badge">Le Matin de l'Elite</div>
+  <h2>Pendant que vos concurrents <span>fouillent les journaux</span></h2>
+  <div class="inbox">
+    <div class="ihd"><div class="idot" style="background:#D63C3C"></div><div class="idot" style="background:#C9A84C"></div><div class="idot" style="background:#2ECC71"></div><span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:middle;margin-right:5px"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>NOBILIS X &#8212; Rapport du Matin</span></div>
+    <div class="ifr"><div class="iav">N</div><div class="imt"><strong>NOBILIS X Intelligence</strong><span>briefing@nobilis-x.gn &nbsp;&#183;&nbsp; Aujourd'hui a 08:05</span></div></div>
+    <div class="ib">
+      <div class="isj"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--gold-lt)" stroke-width="2" stroke-linecap="round" style="vertical-align:middle;margin-right:6px"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Votre Briefing Elite &#8212; 4 Marches Analyses</div>
+      <div class="il"><span class="ibg rd">31/100</span><p><strong>MITP &#8212; Kagbelen&#8211;Kouria (26,7km / 3 lots)</strong> &#8212; Budget National, post-qualification restrictive. 9 elimines. <strong>Ne soumettez pas.</strong></p></div>
+      <div class="il"><span class="ibg gr">89/100</span><p><strong>MITP &#8212; RN29 Faranah&#8211;Dabola (106km)</strong> &#8212; Financement ARE/OEDISCHE confirme. 1 seul concurrent (PROPAV). <strong>Creneau ouvert.</strong></p></div>
+      <div class="il"><span class="ibg gd">67/100</span><p><strong>PCG-SA &#8212; Prequalification Medicaments (276 lots)</strong> &#8212; AO international. 17 soumissionnaires. Segments peu concurrences disponibles.</p></div>
+      <div class="il"><span class="ibg rd">24/100</span><p><strong>MITP &#8212; RN32 Kouroussa&#8211;Siguiri (85km)</strong> &#8212; Financement FINEX/Santander. Attributaire unique (SNETTON HAT UK). <strong>Marche pre-oriente.</strong></p></div>
+    </div>
+  </div>
+  <p class="asym">"C'est l'asymetrie de l'information creatrice de richesse."</p>
+</div>
+
+<!-- S9 -->
+<div class="slide" id="s9">
+  <div class="badge">Le Switch d'Investissement</div>
+  <h2>Le Cout <em style="font-style:italic;color:var(--gold)">Ridicule</em> de l'Information</h2>
+  <div class="bal">
+    <div class="bs hv">
+      <h4><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2.5" stroke-linecap="round" style="vertical-align:middle;margin-right:5px"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Ce que vous depensez maintenant</h4>
+      <div class="bi"><div class="val">15&#8211;30M GNF</div><p>Salaire/charges d'un cadre en recherche inefficace chaque mois</p></div>
+      <div class="bi"><div class="val">100&#8211;300M GNF</div><p>Perte estimee sur 1 an par manque d'information exploitable</p></div>
+      <div class="bi"><div class="val">&#8734;</div><p>Cout des opportunites manquees et tresorerie gelee</p></div>
+    </div>
+    <div class="bvs">VS</div>
+    <div class="bs lt">
+      <h4><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2" stroke-linecap="round" style="vertical-align:middle;margin-right:5px"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>NOBILIS X ELITE</h4>
+      <div class="bi"><div class="val">3,5M GNF</div><p>Par mois. Couverture totale 20 secteurs avec analyse IA.</p></div>
+      <div class="bi"><div class="val">24h</div><p>D'avance sur vos concurrents, chaque matin.</p></div>
+      <div class="bi"><div class="val">0 GNF</div><p>De dossier prepare sur un marche condamne d'avance.</p></div>
+    </div>
+  </div>
+  <div class="roi"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2" stroke-linecap="round" style="vertical-align:middle;margin-right:5px"><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/></svg>Un seul faux pas evite rembourse <strong>3 ans d'abonnement</strong> NOBILIS X.</div>
+</div>
+
+<!-- S10 -->
+<div class="slide" id="s10">
+  <div class="badge">L'Armement &#8212; Plans &amp; Tarifs</div>
+  <h2>Inscription Selective &#8212; Le Cercle des 20 Secteurs</h2>
+  <p class="sub2">Securisez des marches de plusieurs millions pour le prix d'un abonnement telephonique</p>
+  <div class="plans">
+    <div class="plan en">
+      <div class="pnm">NOBILIS ENTRY</div>
+      <div class="ppr">1 500 000 GNF <span>/ mois</span></div>
+      <div class="pf">Veille sur 5 secteurs cles</div>
+      <div class="pf">Alertes quotidiennes centralisees</div>
+      <div class="pf">Notifications temps reel par email</div>
+      <div class="pf">Ideal pour demarrer et tester</div>
+      <button class="pb">Commencer</button>
+    </div>
+    <div class="plan el">
+      <div style="margin-bottom:7px;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--gold-lt)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4l3 12h14l3-12-6 6-4-7-4 7-6-6z"/></svg></div>
+      <div class="pnm">NOBILIS ELITE &#9733;</div>
+      <div class="ppr">3 500 000 GNF <span>/ mois</span></div>
+      <div class="pf">Systeme Expert complet &#8212; Analyse approfondie</div>
+      <div class="pf">Indice de Credibilite (0&#8211;100) pour chaque AO</div>
+      <div class="pf">Couverture totale des 20 secteurs</div>
+      <div class="pf">Rapport strategique personnalise a 8h00</div>
+      <div class="pf">Conseils strategiques personnalises</div>
+      <div class="pf">Support prioritaire dedie</div>
+      <button class="pb">Activer mon Acces ELITE &#8594;</button>
+    </div>
+    <div class="plan ps">
+      <div style="margin-bottom:7px;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg></div>
+      <div class="pnm" style="font-size:.95rem;">NOBILIS PASS</div>
+      <div style="font-size:.75rem;color:var(--muted);margin:7px 0 3px;">Essai Gratuit 2 Jours</div>
+      <div style="font-size:.7rem;color:var(--muted);font-style:italic;margin-bottom:12px;">Sans engagement</div>
+      <button class="pb">Essayer &#8594;</button>
+    </div>
+  </div>
+</div>
+
+<!-- S11 -->
+<div class="slide" id="s11">
+  <div class="s11-glow"></div>
+  <div class="crown"><svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4l3 12h14l3-12-6 6-4-7-4 7-6-6z"/></svg></div>
+  <div class="scar"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:middle;margin-right:5px"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>OFFRE LIMITEE &#8212; 10 LICENCES SEULEMENT CE SOIR</div>
+  <h2>Rejoignez <span>l'Elite</span></h2>
+  <p class="desc">Parce que l'Indice de Credibilite exige une puissance de calcul que nous reservons a ceux qui veulent vraiment dominer leur marche.</p>
+  <div class="ctaw">
+      <div class="qrb">
+        <img src="nobilis_qr_code.png" width="110" height="110" alt="QR Code NOBILIS X" style="display:block; border-radius:3px;">
+        <div class="qrl">SCANNER POUR ACTIVER</div>
+      </div>
+    <div class="ctar">
+      <div class="bonus"><h4><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2" stroke-linecap="round" style="vertical-align:middle;margin-right:5px"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg>Bonus &#8212; 5 Premiers Inscrits</h4><p>Un <strong style="color:var(--txt)">audit gratuit</strong> de votre taux d'echec passe avec notre IA. Decouvrez combien vous avez perdu.</p></div>
+      <div class="conts">
+        <span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--gold-lt)" stroke-width="2" stroke-linecap="round" style="vertical-align:middle;margin-right:6px"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>trillionnx@gmail.com</span>
+        <span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--gold-lt)" stroke-width="2" stroke-linecap="round" style="vertical-align:middle;margin-right:6px"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.8 19.79 19.79 0 01.01 1.18 2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>+224 627 27 13 97</span>
+        <span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--gold-lt)" stroke-width="2" stroke-linecap="round" style="vertical-align:middle;margin-right:6px"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>Conakry, Guinee</span>
+      </div>
+    </div>
+  </div>
+  <div class="tmr">
+    <div class="tl">Le lien est actif pendant encore</div>
+    <div id="td">15:00</div>
+    <div class="tbw"><div id="tb"></div></div>
+  </div>
+</div>
+
+</div><!-- /deck -->
+
+<!-- NAV -->
+<div id="nav">
+  <button id="pb" disabled>&#8592; Prec.</button>
+  <div class="dots" id="dt"></div>
+  <span id="ctr">1 / 11</span>
+  <button id="nb">Suiv. &#8594;</button>
+</div>
+
+<script>
+(function(){
+  var sl=document.querySelectorAll('.slide'),tot=sl.length,cur=0;
+  var secs=['LE CHOC ET LA THESE','LE CHOC ET LA THESE','LE CHOC ET LA THESE','LA REVELATION','LA REVELATION','LA PREUVE EN IMAGES','LA PREUVE EN IMAGES','LA PREUVE EN IMAGES','LE CLOSING','LE CLOSING','LE CLOSING'];
+  var dc=document.getElementById('dt');
+  for(var i=0;i<tot;i++){(function(x){var d=document.createElement('div');d.className='dot'+(x===0?' on':'');d.onclick=function(){go(x);};dc.appendChild(d);})(i);}
+  function go(n){sl[cur].classList.remove('on');dc.children[cur].classList.remove('on');cur=n;sl[cur].classList.add('on');dc.children[cur].classList.add('on');document.getElementById('ctr').textContent=(cur+1)+' / '+tot;document.getElementById('pb').disabled=cur===0;document.getElementById('nb').disabled=cur===tot-1;document.getElementById('prog').style.width=((cur+1)/tot*100)+'%';document.getElementById('sl').textContent=secs[cur]||'';}
+  document.getElementById('pb').addEventListener('click',function(){if(cur>0)go(cur-1);});
+  document.getElementById('nb').addEventListener('click',function(){if(cur<tot-1)go(cur+1);});
+  document.addEventListener('keydown',function(e){if(e.key==='ArrowRight'||e.key==='ArrowDown'){if(cur<tot-1)go(cur+1);}if(e.key==='ArrowLeft'||e.key==='ArrowUp'){if(cur>0)go(cur-1);}});
+  document.getElementById('prog').style.width=(1/tot*100)+'%';
+  var s=900,ts=s;
+  var td=document.getElementById('td'),tb=document.getElementById('tb');
+  setInterval(function(){if(s<=0){td.textContent='00:00';tb.style.width='0%';return;}s--;var m=Math.floor(s/60),sec=s%60;td.textContent=(m<10?'0':'')+m+':'+(sec<10?'0':'')+sec;tb.style.width=(s/ts*100)+'%';},1000);
+  
+  // OPTION B: Direct Closing Detection
+  if(window.location.search.indexOf('close=1') !== -1 || window.location.hash === '#close') {
+    go(tot-1);
+    // Masquer la navigation pour forcer le focus sur l'offre
+    document.getElementById('nav').style.display = 'none';
+    document.getElementById('top').style.display = 'none';
+    document.getElementById('deck').style.bottom = '0';
+    document.getElementById('deck').style.top = '0';
+  }
+})();
+</script>
+</body>
+</html>
